@@ -28,8 +28,11 @@ const useAuthStore = create((set) => ({
             });
             return true;
         } catch (error) {
+            console.error('Login error:', error);
             let errorMessage = 'An unexpected error occurred.';
-            if (error.response?.status === 401) {
+            if (error.code === 'ERR_NETWORK' || !error.response) {
+                errorMessage = 'Network error. Please check your connection.';
+            } else if (error.response?.status === 401) {
                 errorMessage = 'Invalid email or password.';
             } else if (error.response?.status === 500) {
                 errorMessage = 'Server error. Please try again later.';
