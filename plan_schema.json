@@ -1,0 +1,44 @@
+{
+    "required":  [
+                     "durationDays",
+                     "name",
+                     "price"
+                 ],
+    "type":  "object",
+    "properties":  {
+                       "name":  {
+                                    "maxLength":  200,
+                                    "minLength":  1,
+                                    "type":  "string"
+                                },
+                       "description":  {
+                                           "maxLength":  2000,
+                                           "type":  "string",
+                                           "nullable":  true
+                                       },
+                       "price":  {
+                                     "type":  "number",
+                                     "format":  "double"
+                                 },
+                       "durationDays":  {
+                                            "type":  "integer",
+                                            "format":  "int32"
+                                        },
+                       "badge":  {
+                                     "maxLength":  100,
+                                     "type":  "string",
+                                     "nullable":  true
+                                 },
+                       "features":  {
+                                        "type":  "array",
+                                        "items":  {
+                                                      "type":  "string"
+                                                  },
+                                        "nullable":  true
+                                    },
+                       "isActive":  {
+                                        "type":  "boolean"
+                                    }
+                   },
+    "additionalProperties":  false
+}

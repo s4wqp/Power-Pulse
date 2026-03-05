@@ -1,0 +1,40 @@
+﻿
+D:\power_pulse\react_web\src\pages\admin\AdminAddItemPage.jsx
+  35:6  warning  React Hook useEffect has a missing dependency: 'fetchCategories'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\admin\AdminCategoryPage.jsx
+  21:6  warning  React Hook useEffect has a missing dependency: 'fetchProducts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainee\CoachProfilePage.jsx
+  22:6  warning  React Hook useEffect has a missing dependency: 'loadTrainerData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainee\DeliveryAddressesPage.jsx
+  17:6  warning  React Hook useEffect has a missing dependency: 'loadAddresses'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainee\GenericCategoryPage.jsx
+  20:6  warning  React Hook useEffect has a missing dependency: 'loadProducts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainee\OrdersPage.jsx
+   1:28  error  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+  10:9   error  'navigate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerAccountPage.jsx
+  9:11  error  'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerExerciseLibraryPage.jsx
+  17:6  warning  React Hook useEffect has a missing dependency: 'loadWorkouts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerHomePage.jsx
+  19:6  warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerInformationPage.jsx
+  15:6  warning  React Hook useEffect has a missing dependency: 'loadTrainer'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerPlansPage.jsx
+  17:6  warning  React Hook useEffect has a missing dependency: 'loadPlans'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\power_pulse\react_web\src\pages\trainer\TrainerSubscribersPage.jsx
+  18:6  warning  React Hook useEffect has a missing dependency: 'loadSubscribers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Γ£û 13 problems (3 errors, 10 warnings)
+

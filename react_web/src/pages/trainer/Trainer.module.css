@@ -1,0 +1,131 @@
+.pageContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-white);
+    overflow-y: auto;
+    padding-bottom: 70px;
+}
+
+.scrollContent {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.appBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--color-white);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.backBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+.statCard {
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    box-shadow: 0 4px 12px rgba(23, 160, 115, 0.3);
+}
+
+.statValue {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.statLabel {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+.listItem {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-white);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #F0F0F0;
+    cursor: pointer;
+}
+
+.fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(23, 160, 115, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.iconBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-black);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actionGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.actionCard {
+    background-color: #F9F9F9;
+    border: 1px solid #E0E0E0;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.actionCard:active {
+    transform: scale(0.96);
+}

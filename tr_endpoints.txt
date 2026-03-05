@@ -1,0 +1,9 @@
+/api/Auth/signup/trainer
+/api/Subscriptions/trainer/{trainerId}
+/api/Trainers
+/api/Trainers/{id}
+/api/Trainers/{id}/certificates
+/api/Trainers/{id}/workouts
+/api/Trainers/{id}/plans
+/api/Trainers/{id}/plans/{planId}
+/api/Trainers/{id}/bankcards

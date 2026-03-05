@@ -1,0 +1,5 @@
+/api/Chat/{id}/read
+/api/Products/{id}
+/api/Trainees/{id}
+/api/Trainers/{id}
+/api/Trainers/{id}/plans/{planId}

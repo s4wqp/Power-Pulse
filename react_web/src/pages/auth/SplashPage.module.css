@@ -1,0 +1,29 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-white);
+}
+
+.logo {
+    width: 200px;
+    animation: slideFadeScale 2.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes slideFadeScale {
+    0% {
+        transform: translateY(40px) scale(0.9);
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(0) scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1.0);
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "name":  {
+                 "maxLength":  200,
+                 "type":  "string",
+                 "nullable":  true
+             },
+    "phone":  {
+                  "maxLength":  20,
+                  "type":  "string",
+                  "nullable":  true
+              },
+    "professionalTitle":  {
+                              "maxLength":  100,
+                              "type":  "string",
+                              "nullable":  true
+                          },
+    "experienceYears":  {
+                            "type":  "integer",
+                            "format":  "int32",
+                            "nullable":  true
+                        },
+    "bio":  {
+                "maxLength":  2000,
+                "type":  "string",
+                "nullable":  true
+            },
+    "profileImageUrl":  {
+                            "maxLength":  500,
+                            "type":  "string",
+                            "nullable":  true
+                        }
+}

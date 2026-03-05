@@ -1,0 +1,31 @@
+{
+  "required": [
+    "videoUrl"
+  ],
+  "type": "object",
+  "properties": {
+    "videoUrl": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 2000,
+      "type": "string",
+      "nullable": true
+    },
+    "altExercises": {
+      "maxLength": 2000,
+      "type": "string",
+      "nullable": true
+    },
+    "muscles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/WorkoutMuscleDto"
+      },
+      "nullable": true
+    }
+  },
+  "additionalProperties": false
+}

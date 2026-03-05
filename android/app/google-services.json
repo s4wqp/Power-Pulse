@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1084346385742",
+    "project_id": "power-pulse-fa36d",
+    "storage_bucket": "power-pulse-fa36d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084346385742:android:3503297936b18ae3920a1f",
+        "android_client_info": {
+          "package_name": "com.example.power_pulse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGs0SF4kRMmxe3tzF9l1JjkKblxkSvKzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

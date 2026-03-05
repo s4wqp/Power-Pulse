@@ -1,0 +1,76 @@
+import { create } from 'zustand';
+import { traineeService } from '../services/traineeService';
+
+// Helper to extract arrays from .NET API responses that may wrap in {value:[]} or {$values:[]}
+const extractArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.value)) return data.value;
+    if (data && Array.isArray(data.$values)) return data.$values;
+    return [];
+};
+
+const useTraineeStore = create((set) => ({
+    trainee: null,
+    trainerWorkouts: [],
+    orders: [],
+    addresses: [],
+    isLoading: false,
+    error: null,
+
+    fetchProfile: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await traineeService.getProfile(id);
+            set({ trainee: data, isLoading: false });
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+
+    fetchAddresses: async (traineeId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await traineeService.getAddresses(traineeId);
+            const addresses = extractArray(data);
+            set({ addresses, isLoading: false });
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+
+    fetchTrainerWorkouts: async (traineeId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await traineeService.getTrainerWorkouts(traineeId);
+            const workouts = extractArray(data);
+            set({ trainerWorkouts: workouts, isLoading: false });
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+
+    fetchOrders: async (traineeId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await traineeService.getTraineeOrders(traineeId);
+            const ordersList = extractArray(data);
+            set({ orders: ordersList.sort((a, b) => b.id - a.id), isLoading: false });
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+
+    placeOrder: async (orderData) => {
+        set({ isLoading: true, error: null });
+        try {
+            const order = await traineeService.placeOrder(orderData);
+            set(state => ({ orders: [order, ...state.orders], isLoading: false }));
+            return order;
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+            return null;
+        }
+    }
+}));
+
+export default useTraineeStore;
