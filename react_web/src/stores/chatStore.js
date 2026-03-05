@@ -32,8 +32,12 @@ const useChatStore = create((set, get) => ({
             }
         }
 
+        const hubUrl = window.location.hostname !== 'localhost'
+            ? '/chathub'
+            : 'http://powerpuls.runasp.net/chathub';
+
         const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl("http://powerpuls.runasp.net/chathub")
+            .withUrl(hubUrl)
             .withAutomaticReconnect()
             .build();
 

@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// In production (Vercel), use relative URL so requests go through the Vercel proxy.
+// In development (localhost), use the direct backend URL.
+const isProduction = window.location.hostname !== 'localhost';
+const BASE_URL = isProduction ? '' : 'http://powerpuls.runasp.net';
+
 const apiClient = axios.create({
-  baseURL: 'https://powerpuls.runasp.net',
+  baseURL: BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

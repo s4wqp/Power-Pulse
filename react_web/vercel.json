@@ -1,0 +1,16 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "http://powerpuls.runasp.net/api/:path*"
+        },
+        {
+            "source": "/chathub",
+            "destination": "http://powerpuls.runasp.net/chathub"
+        },
+        {
+            "source": "/((?!api|chathub).*)",
+            "destination": "/index.html"
+        }
+    ]
+}
