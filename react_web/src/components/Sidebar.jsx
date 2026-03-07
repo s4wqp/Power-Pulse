@@ -7,7 +7,7 @@ const traineeNav = [
     {
         label: 'MAIN', items: [
             { name: 'Home', icon: 'home', path: '/trainee/home' },
-            { name: 'Store', icon: 'storefront', path: '/trainee/food' },
+            { name: 'Exercises', icon: 'fitness_center', path: '/trainee/exercises' },
             { name: 'My Cart', icon: 'shopping_cart', path: '/trainee/cart' },
             { name: 'My Orders', icon: 'receipt_long', path: '/trainee/orders' },
         ]
@@ -20,7 +20,6 @@ const traineeNav = [
     {
         label: 'ACCOUNT', items: [
             { name: 'Profile', icon: 'person', path: '/trainee/profile' },
-            { name: 'Settings', icon: 'settings', path: '/trainee/settings' },
         ]
     },
 ];
@@ -28,7 +27,7 @@ const traineeNav = [
 const trainerNav = [
     {
         label: 'MAIN', items: [
-            { name: 'Dashboard', icon: 'dashboard', path: '/trainer/home' },
+            { name: 'Home', icon: 'home', path: '/trainer/home' },
             { name: 'Subscribers', icon: 'people', path: '/trainer/subscribers' },
             { name: 'Workouts', icon: 'fitness_center', path: '/trainer/exercises' },
             { name: 'Plans', icon: 'assignment', path: '/trainer/plans' },
@@ -42,7 +41,6 @@ const trainerNav = [
     {
         label: 'ACCOUNT', items: [
             { name: 'Profile', icon: 'person', path: '/trainer/profile' },
-            { name: 'Account', icon: 'manage_accounts', path: '/trainer/account' },
         ]
     },
 ];

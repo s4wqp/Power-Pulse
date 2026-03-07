@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import useAuthStore from '../../stores/authStore';
+import useTraineeStore from '../../stores/traineeStore';
 import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
@@ -8,6 +10,32 @@ const ExerciseDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { exercise, category } = location.state || {};
+
+  const { user } = useAuthStore();
+  const { subscriptions, fetchSubscriptions } = useTraineeStore();
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchSubscriptions(user.id);
+    }
+  }, [user?.id, fetchSubscriptions]);
+
+  useEffect(() => {
+    if (subscriptions && subscriptions.length > 0) {
+      // Check if there is an active subscription. The API might return status "Active" or check dates.
+      // We will assume any subscription with status 'Active' or an end date in the future is valid.
+      const now = new Date();
+      const isActive = subscriptions.some(sub => {
+        if (sub.status === 'Active') return true;
+        if (sub.endDate && new Date(sub.endDate) >= now && new Date(sub.startDate) <= now) return true;
+        return false;
+      });
+      setHasActiveSubscription(isActive);
+    } else {
+      setHasActiveSubscription(false);
+    }
+  }, [subscriptions]);
 
   if (!exercise) {
     navigate('/trainee/exercises');
@@ -27,7 +55,7 @@ const ExerciseDetailPage = () => {
               <span className="material-icons" style={{ fontSize: 80, color: '#ccc' }}>fitness_center</span>
             )}
 
-            {exercise.videoUrl && (
+            {exercise.videoUrl && hasActiveSubscription && (
               <a
                 href={exercise.videoUrl}
                 target="_blank"
@@ -36,6 +64,16 @@ const ExerciseDetailPage = () => {
               >
                 <span className="material-icons" style={{ color: 'white', fontSize: 36 }}>play_arrow</span>
               </a>
+            )}
+
+            {exercise.videoUrl && !hasActiveSubscription && (
+              <div
+                style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20, textAlign: 'center' }}
+              >
+                <span className="material-icons" style={{ color: 'white', fontSize: 48, marginBottom: 12 }}>lock</span>
+                <span style={{ color: 'white', fontWeight: 600, fontSize: 16 }}>Video Locked</span>
+                <span style={{ color: '#ddd', fontSize: 13, marginTop: 4 }}>Active subscription required to view trainer videos</span>
+              </div>
             )}
           </div>
         </div>

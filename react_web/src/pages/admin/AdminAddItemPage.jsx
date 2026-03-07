@@ -5,6 +5,8 @@ import { productService } from '../../services/productService';
 import WebLayout from '../../components/WebLayout';
 import styles from '../../components/WebLayout.module.css';
 import toast from 'react-hot-toast';
+import { useGoogleLogin } from '@react-oauth/google';
+import { driveService } from '../../services/driveService';
 
 const storeTypeMap = { Food: 'HealthyMeals', Supplements: 'Supplements', Clothes: 'Apparel' };
 
@@ -29,6 +31,8 @@ const AdminAddItemPage = () => {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -50,7 +54,16 @@ const AdminAddItemPage = () => {
     setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
   };
 
-  const handleSave = async () => {
+  const googleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => submitData(tokenResponse.access_token),
+    onError: () => {
+      setSaving(false);
+      toast.error('Google login failed for image upload');
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file'
+  });
+
+  const handleSave = () => {
     if (!name.trim() || !price.trim()) {
       toast.error('Name and price are required');
       return;
@@ -61,32 +74,46 @@ const AdminAddItemPage = () => {
     }
 
     setSaving(true);
-    const priceNum = parseFloat(price.replace(/[^0-9.]/g, '')) || 0;
-    const storeType = storeTypeMap[categoryType] || 'HealthyMeals';
-
-    const attributes = [];
-    if (categoryType === 'Food') {
-      attributes.push({ attrName: 'Calories', attrValue: calories.trim(), attrUnit: 'kcal' });
-    } else if (categoryType === 'Supplements') {
-      attributes.push({ attrName: 'Type', attrValue: supplementType });
-      attributes.push({ attrName: 'Grams', attrValue: measure.trim(), attrUnit: supplementType === 'Protein' ? 'g' : 'ml' });
-    } else if (categoryType === 'Clothes') {
-      selectedSizes.forEach(size => {
-        attributes.push({ attrName: 'Size', attrValue: size, attrUnit: gender });
-      });
+    if (imageFile) {
+      googleLogin(); // Trigger Google OAuth to get token, which then calls submitData
+    } else {
+      submitData(null); // Save without a new image
     }
+  };
 
-    const payload = {
-      name: name.trim(),
-      price: priceNum,
-      description: description.trim() || 'No description',
-      imageUrls: imageUrl.trim() ? [imageUrl.trim()] : [],
-      storeType,
-      productCategoryId: parseInt(selectedCategoryId),
-      attributes,
-    };
-
+  const submitData = async (token) => {
     try {
+      let finalImageUrl = imageUrl;
+      if (imageFile) {
+        if (!token) throw new Error("Missing Drive Token");
+        finalImageUrl = await driveService.uploadFileWithToken(imageFile, token);
+      }
+
+      const priceNum = parseFloat(price.replace(/[^0-9.]/g, '')) || 0;
+      const storeType = storeTypeMap[categoryType] || 'HealthyMeals';
+
+      const attributes = [];
+      if (categoryType === 'Food') {
+        attributes.push({ attrName: 'Calories', attrValue: calories.trim(), attrUnit: 'kcal' });
+      } else if (categoryType === 'Supplements') {
+        attributes.push({ attrName: 'Type', attrValue: supplementType });
+        attributes.push({ attrName: 'Grams', attrValue: measure.trim(), attrUnit: supplementType === 'Protein' ? 'g' : 'ml' });
+      } else if (categoryType === 'Clothes') {
+        selectedSizes.forEach(size => {
+          attributes.push({ attrName: 'Size', attrValue: size, attrUnit: gender });
+        });
+      }
+
+      const payload = {
+        name: name.trim(),
+        price: priceNum,
+        description: description.trim() || 'No description',
+        imageUrls: finalImageUrl.trim() ? [finalImageUrl.trim()] : [],
+        storeType,
+        productCategoryId: parseInt(selectedCategoryId),
+        attributes,
+      };
+
       await productService.createProduct(user?.id, payload);
       toast.success('Product added successfully!');
       navigate(-1);
@@ -94,6 +121,17 @@ const AdminAddItemPage = () => {
       toast.error('Failed to add product: ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+      setImageUrl(''); // Clear the manual URL input if you pick a file
     }
   };
 
@@ -127,10 +165,33 @@ const AdminAddItemPage = () => {
               <input className={styles.formInput} placeholder="e.g. 200" value={price} onChange={e => setPrice(e.target.value)} />
             </div>
 
-            {/* Image URL */}
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Image URL</label>
-              <input className={styles.formInput} placeholder="https://..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
+            {/* Image Uploader */}
+            <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
+              <label className={styles.formLabel}>Product Image</label>
+              <div
+                style={{
+                  width: '120px', height: '120px', border: '1px dashed #ccc', borderRadius: '12px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  position: 'relative', overflow: 'hidden', background: '#f8f9fa'
+                }}
+                onClick={() => document.getElementById('adminImageUpload').click()}
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#888' }}>
+                    <span className="material-icons" style={{ fontSize: '32px', marginBottom: '4px' }}>add_photo_alternate</span>
+                    <span style={{ fontSize: '12px', fontWeight: '500' }}>Add Image</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id="adminImageUpload"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleImageChange}
+                />
+              </div>
             </div>
 
             {/* Description */}

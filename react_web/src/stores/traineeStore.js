@@ -14,9 +14,9 @@ const useTraineeStore = create((set) => ({
     trainerWorkouts: [],
     orders: [],
     addresses: [],
+    subscriptions: [],
     isLoading: false,
     error: null,
-
     fetchProfile: async (id) => {
         set({ isLoading: true, error: null });
         try {
@@ -49,6 +49,17 @@ const useTraineeStore = create((set) => ({
         }
     },
 
+    fetchSubscriptions: async (traineeId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const data = await traineeService.getTraineeSubscriptions(traineeId);
+            const subscriptions = extractArray(data);
+            set({ subscriptions, isLoading: false });
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+
     fetchOrders: async (traineeId) => {
         set({ isLoading: true, error: null });
         try {
@@ -57,6 +68,22 @@ const useTraineeStore = create((set) => ({
             set({ orders: ordersList.sort((a, b) => b.id - a.id), isLoading: false });
         } catch (error) {
             set({ error: error.message, isLoading: false });
+        }
+    },
+
+    addAddress: async (traineeId, addressData) => {
+        set({ isLoading: true, error: null });
+        try {
+            const newAddress = await traineeService.addAddress(traineeId, addressData);
+            set(state => ({
+                addresses: [...state.addresses, newAddress],
+                isLoading: false
+            }));
+            return true;
+        } catch (error) {
+            console.error('Failed to add address:', error);
+            set({ error: error.message, isLoading: false });
+            return false;
         }
     },
 

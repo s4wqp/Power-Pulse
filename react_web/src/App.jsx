@@ -43,6 +43,7 @@ import TermsAndPrivacyPage from './pages/trainee/TermsAndPrivacyPage';
 // Trainer Pages
 import TrainerHomePage from './pages/trainer/TrainerHomePage';
 import TrainerExerciseLibraryPage from './pages/trainer/TrainerExerciseLibraryPage';
+import TrainerExerciseDetailPage from './pages/trainer/TrainerExerciseDetailPage';
 import AddWorkoutPage from './pages/trainer/AddWorkoutPage';
 import TrainerChatListPage from './pages/trainer/TrainerChatListPage';
 import TrainerChatDetailPage from './pages/trainer/TrainerChatDetailPage';
@@ -53,6 +54,8 @@ import TrainerInformationPage from './pages/trainer/TrainerInformationPage';
 import TrainerPlansPage from './pages/trainer/TrainerPlansPage';
 import TrainerAddPlanPage from './pages/trainer/TrainerAddPlanPage';
 import TrainerSubscribersPage from './pages/trainer/TrainerSubscribersPage';
+import TrainerNotesPage from './pages/trainer/TrainerNotesPage';
+import TrainerNoteEditorPage from './pages/trainer/TrainerNoteEditorPage';
 
 // Admin Pages
 import AdminHomePage from './pages/admin/AdminHomePage';
@@ -133,9 +136,12 @@ const App = () => {
         {/* Trainer Routes */}
         <Route path="/trainer/home" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerHomePage /></ProtectedRoute>} />
         <Route path="/trainer/exercises" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerExerciseLibraryPage /></ProtectedRoute>} />
+        <Route path="/trainer/exercises/details" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerExerciseDetailPage /></ProtectedRoute>} />
         <Route path="/trainer/add-workout" element={<ProtectedRoute allowedRoles={['Trainer']}><AddWorkoutPage /></ProtectedRoute>} />
         <Route path="/trainer/chat" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerChatListPage /></ProtectedRoute>} />
         <Route path="/trainer/chat/:id" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerChatDetailPage /></ProtectedRoute>} />
+        <Route path="/trainer/chat/:traineeId/notes" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerNotesPage /></ProtectedRoute>} />
+        <Route path="/trainer/chat/:traineeId/notes/:noteId" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerNoteEditorPage /></ProtectedRoute>} />
         <Route path="/trainer/profile" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerProfilePage /></ProtectedRoute>} />
         <Route path="/trainer/edit-profile" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerEditProfilePage /></ProtectedRoute>} />
         <Route path="/trainer/account" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerAccountPage /></ProtectedRoute>} />
@@ -143,6 +149,9 @@ const App = () => {
         <Route path="/trainer/plans" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerPlansPage /></ProtectedRoute>} />
         <Route path="/trainer/add-plan" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerAddPlanPage /></ProtectedRoute>} />
         <Route path="/trainer/subscribers" element={<ProtectedRoute allowedRoles={['Trainer']}><TrainerSubscribersPage /></ProtectedRoute>} />
+        <Route path="/trainer/payment-details" element={<ProtectedRoute allowedRoles={['Trainer']}><PaymentDetailsPage /></ProtectedRoute>} />
+        <Route path="/trainer/contact-us" element={<ProtectedRoute allowedRoles={['Trainer']}><ContactUsPage /></ProtectedRoute>} />
+        <Route path="/trainer/terms" element={<ProtectedRoute allowedRoles={['Trainer']}><TermsAndPrivacyPage /></ProtectedRoute>} />
 
         {/* Admin Routes */}
         <Route path="/admin/home" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHomePage /></ProtectedRoute>} />

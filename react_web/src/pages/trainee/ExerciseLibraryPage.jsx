@@ -7,35 +7,37 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 
+// Import muscle images
+import chestImg from '../../assets/images/chest.png';
+import backImg from '../../assets/images/back.png';
+import shoulderImg from '../../assets/images/shoulder.png';
+import armsImg from '../../assets/images/arms.png';
+import absImg from '../../assets/images/abs.png';
+import legsImg from '../../assets/images/legs.png';
+
+const MUSCLE_CATEGORIES = [
+  { name: 'Chest', iconUrl: chestImg },
+  { name: 'Back', iconUrl: backImg },
+  { name: 'Shoulders', iconUrl: shoulderImg },
+  { name: 'Arms', iconUrl: armsImg },
+  { name: 'Abs', iconUrl: absImg },
+  { name: 'Legs', iconUrl: legsImg },
+];
+
 const ExerciseLibraryPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { trainerWorkouts, fetchTrainerWorkouts, isLoading: loadingWorkouts } = useTraineeStore();
 
-  const [categories, setCategories] = useState([]);
-  const [selectedCat, setSelectedCat] = useState('');
-  const [loadingCats, setLoadingCats] = useState(true);
+  const [categories, setCategories] = useState(MUSCLE_CATEGORIES);
+  const [selectedCat, setSelectedCat] = useState(MUSCLE_CATEGORIES[0].name);
+  const [loadingCats, setLoadingCats] = useState(false);
 
   useEffect(() => {
-    loadCategories();
     if (user?.id) {
       fetchTrainerWorkouts(user.id);
     }
-  }, [user?.id]);
-
-  const loadCategories = async () => {
-    try {
-      const data = await productService.getMuscles();
-      setCategories(data || []);
-      if (data && data.length > 0) {
-        setSelectedCat(data[0].name);
-      }
-    } catch {
-      setCategories([]);
-    } finally {
-      setLoadingCats(false);
-    }
-  };
+  }, [user?.id, fetchTrainerWorkouts]);
 
   // Filter workouts by selected category (muscle) and deduplicate
   const seenIds = new Set();
@@ -55,7 +57,15 @@ const ExerciseLibraryPage = () => {
   return (
     <WebLayout title="Exercise Library" subtitle="Workouts assigned by your coach">
       {/* Categories Horizontal List */}
-      <div style={{ display: 'flex', overflowX: 'auto', gap: 16, paddingBottom: 16, marginBottom: 24, scrollbarWidth: 'none' }}>
+      <div style={{
+        display: 'flex',
+        overflowX: 'auto',
+        gap: 16,
+        paddingBottom: 24,
+        marginBottom: 24,
+        scrollbarWidth: 'none',
+        borderBottom: '1px solid #eee'
+      }}>
         {loadingCats ? (
           <div className={styles.loadingSpinner}><div className={styles.spinner} style={{ width: 24, height: 24 }} /></div>
         ) : categories.map((cat, idx) => {
@@ -66,25 +76,38 @@ const ExerciseLibraryPage = () => {
               onClick={() => setSelectedCat(cat.name)}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer',
-                opacity: isSelected ? 1 : 0.6,
-                minWidth: 70
+                opacity: 1,
+                backgroundColor: isSelected ? 'var(--color-primary)' : '#fff',
+                padding: '16px 12px',
+                borderRadius: 16,
+                border: isSelected ? '2px solid var(--color-primary)' : '2px solid transparent',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                transition: 'all 0.2s',
+                minWidth: 100,
+                flexShrink: 0
               }}
             >
               <div style={{
-                width: 60, height: 60, borderRadius: 30,
-                backgroundColor: isSelected ? 'var(--color-primary)' : '#f5f5f5',
+                width: 60, height: 60,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 12,
-                boxShadow: isSelected ? '0 4px 8px rgba(23,160,115,0.3)' : 'none',
-                transition: 'all 0.2s'
+                marginBottom: 12,
               }}>
                 {cat.iconUrl ? (
-                  <CachedImage imageUrl={cat.iconUrl} width="100%" height="100%" fit="contain" />
+                  <img
+                    src={cat.iconUrl}
+                    alt={cat.name}
+                    style={{
+                      width: '100%', height: '100%', objectFit: 'contain'
+                    }}
+                  />
                 ) : (
-                  <span className="material-icons" style={{ color: isSelected ? '#fff' : '#999' }}>fitness_center</span>
+                  <span className="material-icons" style={{ fontSize: 40, color: isSelected ? '#fff' : '#999' }}>fitness_center</span>
                 )}
               </div>
-              <span style={{ fontSize: 13, fontWeight: 'bold', marginTop: 8, color: isSelected ? 'var(--color-black)' : '#666' }}>
+              <span style={{
+                fontSize: 14, fontWeight: 'bold',
+                color: isSelected ? '#fff' : '#777'
+              }}>
                 {cat.name}
               </span>
             </div>

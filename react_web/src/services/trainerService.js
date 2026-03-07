@@ -85,8 +85,8 @@ export const trainerService = {
     },
 
     getWorkouts: async (trainerId) => {
-        const response = await apiClient.get(`/api/trainers/${trainerId}/workouts`);
-        return response.data;
+        const response = await apiClient.get(`/api/trainers/${trainerId}`);
+        return response.data?.workouts || [];
     },
 
     getDailyNotes: async (subscriptionId) => {

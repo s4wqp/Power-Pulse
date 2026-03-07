@@ -8,38 +8,25 @@ const TransactionSuccessPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className={styles.pageContainer} style={{ justifyContent: 'center', alignItems: 'center', padding: '40px 20px' }}>
-      <div style={{
-        width: '120px', height: '120px', borderRadius: '60px',
-        backgroundColor: 'rgba(23, 160, 115, 0.1)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: '30px'
-      }}>
-        <div style={{
-          width: '80px', height: '80px', borderRadius: '40px',
-          backgroundColor: 'var(--color-primary)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <span className="material-icons" style={{ color: 'white', fontSize: '48px' }}>check</span>
-        </div>
+    <div className={styles.pageContainer} style={{ justifyContent: 'center', alignItems: 'center', padding: '40px 20px', backgroundColor: '#fff', position: 'relative' }}>
+
+      {/* Animated SVG Checkmark Circle */}
+      <div className={styles.successAnimationContainer}>
+        <svg className={styles.checkmark} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle className={styles.checkmarkCircle} cx="26" cy="26" r="25" fill="none" />
+          <path className={styles.checkmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+        </svg>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        {Typography.mainText('Payment Successful!')}
-        <p style={{ color: 'var(--color-text-second)', marginTop: '16px', lineHeight: '1.5' }}>
-          Your order has been successfully placed. You can track its status in the Orders section.
+        <h1 style={{ color: 'var(--color-primary)', fontSize: '28px', fontWeight: 'bold', margin: '0 0 12px 0', fontFamily: 'var(--font-family)' }}>Success!</h1>
+        <p style={{ color: 'var(--color-text-second)', fontSize: '18px', margin: 0, fontFamily: 'var(--font-family)' }}>
+          Transaction Confirmed
         </p>
       </div>
 
-      <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <Button onClick={() => navigate('/trainee/orders', { replace: true })}>
-          View Orders
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/trainee/home', { replace: true })}
-          style={{ backgroundColor: '#F5F5F5', border: 'none' }}
-        >
+      <div style={{ width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '16px', position: 'absolute', bottom: '60px', padding: '0 20px', boxSizing: 'border-box' }}>
+        <Button onClick={() => navigate('/trainee/home', { replace: true })} style={{ padding: '16px', fontSize: '18px', borderRadius: '30px', boxShadow: '0 8px 16px rgba(23, 160, 115, 0.3)' }}>
           Back to Home
         </Button>
       </div>

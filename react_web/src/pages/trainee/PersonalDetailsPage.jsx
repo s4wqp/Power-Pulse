@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 import useTraineeStore from '../../stores/traineeStore';
-import TextField from '../../components/TextField';
-import Button from '../../components/Button';
+import WebLayout from '../../components/WebLayout';
+import CachedImage from '../../components/CachedImage';
 import { showToast } from '../../utils/custom';
-import styles from './Trainee.module.css';
+import styles from '../../components/WebLayout.module.css';
 
 const PersonalDetailsPage = () => {
   const navigate = useNavigate();
@@ -15,16 +15,10 @@ const PersonalDetailsPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    weight: '',
-    height: '',
-    targetWeight: '',
-    age: ''
   });
 
   useEffect(() => {
-    if (user?.id && !trainee) {
-      fetchProfile(user.id);
-    }
+    if (user?.id && !trainee) fetchProfile(user.id);
   }, [user?.id, trainee, fetchProfile]);
 
   useEffect(() => {
@@ -32,10 +26,6 @@ const PersonalDetailsPage = () => {
       setFormData({
         name: trainee.name || user?.fullName || '',
         phone: trainee.phone || '',
-        weight: trainee.weight?.toString() || '',
-        height: trainee.height?.toString() || '',
-        targetWeight: trainee.targetWeight?.toString() || '',
-        age: trainee.age?.toString() || ''
       });
     }
   }, [trainee, user]);
@@ -49,10 +39,6 @@ const PersonalDetailsPage = () => {
     if (user?.id) {
       const payload = {
         ...formData,
-        weight: parseFloat(formData.weight) || 0,
-        height: parseFloat(formData.height) || 0,
-        targetWeight: parseFloat(formData.targetWeight) || 0,
-        age: parseInt(formData.age, 10) || 0
       };
       const success = await updateProfile(user.id, payload);
       if (success) {
@@ -65,57 +51,47 @@ const PersonalDetailsPage = () => {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.appBar}>
-        <div className={styles.headerRow} style={{ marginBottom: 0 }}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <span className="material-icons">arrow_back_ios</span>
-          </button>
-          <span style={{ fontSize: '20px', fontWeight: 'bold' }}>Personal Details</span>
+    <WebLayout title="Personal Details" subtitle="Update your profile information">
+      <div style={{ maxWidth: '700px' }}>
+        {/* Form */}
+        <div className={styles.card}>
+          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '600', color: '#8a92a6', display: 'block', marginBottom: '8px' }}>Name</label>
+              <input className={styles.formInput} value={formData.name} onChange={handleChange('name')} style={{ width: '100%', boxSizing: 'border-box', background: '#f5f6f8', border: 'none', borderRadius: '8px', padding: '14px 16px', fontSize: '15px', fontWeight: '600', color: '#1a1a2e' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ flex: '1' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#8a92a6', display: 'block', marginBottom: '8px' }}>Country</label>
+                <div style={{ background: '#f5f6f8', borderRadius: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '15px', fontWeight: '700', color: '#1a1a2e' }}>+20</span>
+                </div>
+              </div>
+              <div style={{ flex: '2' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#8a92a6', display: 'block', marginBottom: '8px' }}>Mobile Number</label>
+                <input className={styles.formInput} value={formData.phone} onChange={handleChange('phone')} style={{ width: '100%', boxSizing: 'border-box', background: '#f5f6f8', border: 'none', borderRadius: '8px', padding: '14px 16px', fontSize: '15px', fontWeight: '600', color: '#1a1a2e' }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '600', color: '#8a92a6', display: 'block', marginBottom: '8px' }}>Email Addresses</label>
+              <input className={styles.formInput} value={trainee?.email || user?.email || ''} readOnly style={{ width: '100%', boxSizing: 'border-box', background: '#f5f6f8', border: 'none', borderRadius: '8px', padding: '14px 16px', fontSize: '15px', fontWeight: '600', color: '#1a1a2e' }} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+              <button type="submit" className={styles.btnPrimary} disabled={isLoading} style={{ width: '180px', justifyContent: 'center', padding: '14px', borderRadius: '25px', background: '#17A073', color: 'white', fontWeight: '700', fontSize: '16px' }}>
+                {isLoading ? (
+                  <><div className={styles.spinner} style={{ width: '18px', height: '18px', borderWidth: '2px', borderColor: 'white #ffffff4d #ffffff4d #ffffff4d' }} /> Saving</>
+                ) : (
+                  'Save'
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-
-      <div className={styles.scrollContent}>
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <TextField
-            label="Full Name"
-            icon="person_outline"
-            value={formData.name}
-            onChange={handleChange('name')}
-          />
-          <TextField
-            label="Phone Number"
-            icon="phone"
-            value={formData.phone}
-            onChange={handleChange('phone')}
-          />
-
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ flex: 1 }}>
-              <TextField label="Age" type="number" value={formData.age} onChange={handleChange('age')} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <TextField label="Height (cm)" type="number" value={formData.height} onChange={handleChange('height')} />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ flex: 1 }}>
-              <TextField label="Weight (kg)" type="number" value={formData.weight} onChange={handleChange('weight')} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <TextField label="Target Weight" type="number" value={formData.targetWeight} onChange={handleChange('targetWeight')} />
-            </div>
-          </div>
-
-          <div style={{ marginTop: '40px' }}>
-            <Button onClick={handleSave} disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </WebLayout>
   );
 };
 

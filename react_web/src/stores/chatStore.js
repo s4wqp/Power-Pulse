@@ -159,7 +159,13 @@ const useChatStore = create((set, get) => ({
     },
 
     fetchContacts: async (userId, role, showLoading = true) => {
-        get().connectSignalR(userId.toString(), role);
+        // Attempt SignalR connection but don't let it block contact loading
+        try {
+            get().connectSignalR(userId.toString(), role);
+        } catch (e) {
+            console.warn("SignalR connection failed, chat will work without real-time updates:", e);
+        }
+
         if (showLoading) set({ isLoading: true, error: null });
 
         try {

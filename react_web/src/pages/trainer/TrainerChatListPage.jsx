@@ -2,14 +2,13 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 import useChatStore from '../../stores/chatStore';
-import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
-import styles from '../../components/WebLayout.module.css';
+import styles from './Trainer.module.css';
 
 const TrainerChatListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { contacts, isLoading, fetchContacts } = useChatStore();
+  const { contacts, isLoading, fetchContacts, markChatAsRead } = useChatStore();
 
   useEffect(() => {
     if (user?.id) fetchContacts(user.id, 'Trainer');
@@ -17,64 +16,137 @@ const TrainerChatListPage = () => {
 
   const formatTime = (time) => {
     if (!time) return '';
-    const date = new Date(time);
-    const now = new Date();
-    if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    try {
+      const date = new Date(time);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+      if (msgDay.getTime() === today.getTime()) {
+        let h = date.getHours();
+        const m = date.getMinutes().toString().padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${m} ${ampm}`;
+      }
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (msgDay.getTime() === yesterday.getTime()) return 'Yesterday';
+      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    } catch {
+      return '';
     }
-    return date.toLocaleDateString();
   };
 
+  // De-duplicate contacts by userId
+  const uniqueMap = {};
+  (contacts || []).forEach(c => { uniqueMap[c.userId] = c; });
+  const uniqueContacts = Object.values(uniqueMap);
+
   return (
-    <WebLayout title="Client Messages" subtitle="Chat with your subscribers">
-      {isLoading ? (
-        <div className={styles.loadingSpinner}><div className={styles.spinner} /></div>
-      ) : contacts.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className="material-icons">chat_bubble_outline</span>
-          <p>No conversations yet</p>
-        </div>
-      ) : (
-        <div className={styles.card}>
-          {contacts.map((contact) => (
-            <div
-              key={contact.userId}
-              onClick={() => navigate(`/trainer/chat/${contact.userId}`, { state: { contact } })}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 12px',
-                borderBottom: '1px solid #f5f5f5', cursor: 'pointer', transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <div style={{ width: 48, height: 48, borderRadius: 14, overflow: 'hidden', background: '#f0f0f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {contact.profileImageUrl ? (
-                  <CachedImage imageUrl={contact.profileImageUrl} width="100%" height="100%" fit="cover" />
-                ) : (
-                  <span className="material-icons" style={{ fontSize: 24, color: '#ccc' }}>person</span>
-                )}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 600, fontSize: 15 }}>{contact.name}</span>
-                  <span style={{ fontSize: 12, color: '#aaa' }}>{formatTime(contact.lastMessageTime)}</span>
+    <div className={styles.pageContainer} style={{ backgroundColor: 'white' }}>
+      {/* Dark Green Header Banner matching mobile trainer theme */}
+      <div style={{
+        background: 'linear-gradient(135deg, #1B3A2D 0%, #17A073 100%)',
+        padding: '40px 20px 30px',
+        textAlign: 'center',
+        borderBottomLeftRadius: '24px',
+        borderBottomRightRadius: '24px',
+        position: 'relative',
+      }}>
+        {/* Lightning icon like Flutter */}
+        <span className="material-icons" style={{
+          position: 'absolute', top: '36px', left: '20px',
+          color: '#17A073', fontSize: '28px'
+        }}>flash_on</span>
+        <h1 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Chats</h1>
+      </div>
+
+      {/* Contact List */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
+            <div style={{ width: '36px', height: '36px', border: '3px solid #E0E0E0', borderTopColor: '#17A073', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          </div>
+        ) : uniqueContacts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#999' }}>
+            <span className="material-icons" style={{ fontSize: '48px', color: '#DDD', display: 'block', marginBottom: '12px' }}>chat_bubble_outline</span>
+            <p style={{ fontSize: '14px' }}>No active subscribers found.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {uniqueContacts.map((contact) => (
+              <div
+                key={contact.userId}
+                onClick={() => {
+                  markChatAsRead(contact.userId);
+                  navigate(`/trainer/chat/${contact.userId}`, {
+                    state: {
+                      contact: {
+                        id: contact.userId,
+                        name: contact.name,
+                        image: contact.profileImageUrl,
+                        role: contact.role,
+                      }
+                    }
+                  });
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '14px',
+                  padding: '14px',
+                  backgroundColor: 'white',
+                  borderRadius: '24px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.15s, box-shadow 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.1)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.06)'; }}
+              >
+                {/* Avatar */}
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden', background: '#f0f0f0', flexShrink: 0 }}>
+                  {contact.profileImageUrl ? (
+                    <CachedImage imageUrl={contact.profileImageUrl} width="100%" height="100%" fit="cover" />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E8F5E9' }}>
+                      <span className="material-icons" style={{ fontSize: '28px', color: '#17A073' }}>person</span>
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                  <span style={{ fontSize: 13, color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 400 }}>
-                    {contact.lastMessage || 'Start a conversation'}
+
+                {/* Name + Last Message (trainer: name in black, lastMsg in green) */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#222' }}>
+                    {contact.name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#17A073', fontWeight: 500, marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {contact.lastMessage || 'No messages yet'}
+                  </div>
+                </div>
+
+                {/* Time + Unread Badge */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#17A073' }}>
+                    {formatTime(contact.lastMessageTime)}
                   </span>
                   {contact.unreadCount > 0 && (
-                    <span style={{ background: '#17A073', color: 'white', borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700, minWidth: 20, textAlign: 'center' }}>
+                    <span style={{
+                      backgroundColor: '#FF3B30', color: 'white', borderRadius: '50%',
+                      width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '10px', fontWeight: 'bold'
+                    }}>
                       {contact.unreadCount}
                     </span>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </WebLayout>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
   );
 };
 

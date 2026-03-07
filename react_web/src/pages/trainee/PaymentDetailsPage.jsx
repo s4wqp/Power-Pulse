@@ -1,130 +1,166 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import useCartStore from '../../stores/cartStore';
-import useTraineeStore from '../../stores/traineeStore';
-import useAuthStore from '../../stores/authStore';
-import Button from '../../components/Button';
-import { showToast } from '../../utils/custom';
-import styles from './Trainee.module.css';
+import { useNavigate } from 'react-router-dom';
+import WebLayout from '../../components/WebLayout';
+import styles from '../../components/WebLayout.module.css';
 
 const PaymentDetailsPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { items: cartItems, clearCart } = useCartStore();
-  const placeOrder = useTraineeStore(state => state.placeOrder);
-  const user = useAuthStore(state => state.user);
 
-  // Passed from CheckoutPage
-  const deliveryAddressId = location.state?.addressId;
+  const [cards, setCards] = useState([
+    { id: 1, last4: '3212', holder: 'Power Pulse Member', expiry: '12/56', brand: 'Mastercard' },
+    { id: 2, last4: '7777', holder: 'Power Pulse Member', expiry: '08/27', brand: 'Mastercard' },
+  ]);
 
-  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' or 'cash'
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newCard, setNewCard] = useState({ number: '', holder: '', expiry: '', cvv: '' });
 
-  const handlePay = async () => {
-    if (!user?.id) {
-      showToast('You must be logged in to checkout.', true);
-      return;
-    }
+  const handleCardNumberChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '');
+    if (val.length <= 16) setNewCard({ ...newCard, number: val });
+  };
 
-    if (cartItems.length === 0) {
-      showToast('Your cart is empty', true);
-      return;
-    }
+  const handleExpiryChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 4) val = val.slice(0, 4);
+    if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
+    setNewCard({ ...newCard, expiry: val });
+  };
 
-    setIsProcessing(true);
-
-    // Format items to match backend API requirement: { productId, quantity, selectedOption }
-    const itemsPayload = cartItems.map(item => ({
-      productId: item.id,
-      quantity: item.quantity,
-      selectedOption: item.size || item.subCategory || "None" // Fallback if no specific variance selected
-    }));
-
-    const orderData = {
-      traineeId: user.id,
-      deliveryAddressId: deliveryAddressId || null,
-      items: itemsPayload
+  const handleAddCard = () => {
+    if (newCard.number.length < 16) return;
+    const card = {
+      id: Date.now(),
+      last4: newCard.number.slice(-4),
+      holder: newCard.holder || 'Power Pulse Member',
+      expiry: newCard.expiry || 'MM/YY',
+      brand: 'Mastercard',
     };
+    setCards([...cards, card]);
+    setNewCard({ number: '', holder: '', expiry: '', cvv: '' });
+    setShowAddForm(false);
+  };
 
-    const orderResponse = await placeOrder(orderData);
-
-    if (orderResponse) {
-      clearCart();
-      showToast('Order placed successfully!');
-      navigate('/trainee/orders', { replace: true });
-    } else {
-      showToast('Failed to place order. Please try again.', true);
-    }
-
-    setIsProcessing(false);
+  const handleDeleteCard = (id) => {
+    setCards(cards.filter(c => c.id !== id));
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.appBar}>
-        <div className={styles.headerRow} style={{ marginBottom: 0 }}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)} disabled={isProcessing}>
-            <span className="material-icons">arrow_back_ios</span>
-          </button>
-          <span style={{ fontSize: '20px', fontWeight: 'bold' }}>Payment Details</span>
-        </div>
-      </div>
+    <WebLayout title="Payment Details" subtitle="Manage your payment cards">
+      <div style={{ maxWidth: '700px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a2e', marginBottom: '24px' }}>Your Cards</h3>
 
-      <div className={styles.scrollContent}>
-        <span style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px', display: 'block' }}>Payment Method</span>
-
-        {/* Method Selection */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '30px' }}>
-          <div
-            onClick={() => setPaymentMethod('card')}
-            style={{ display: 'flex', alignItems: 'center', padding: '16px', borderRadius: '12px', border: paymentMethod === 'card' ? '2px solid var(--color-primary)' : '1px solid #E0E0E0', cursor: 'pointer', backgroundColor: 'var(--color-white)' }}
-          >
-            <span className="material-icons" style={{ color: paymentMethod === 'card' ? 'var(--color-primary)' : 'var(--color-gray)', marginRight: '16px' }}>credit_card</span>
-            <span style={{ fontWeight: 'bold', flex: 1 }}>Credit / Debit Card</span>
-            {paymentMethod === 'card' && <span className="material-icons" style={{ color: 'var(--color-primary)' }}>check_circle</span>}
-          </div>
-
-          <div
-            onClick={() => setPaymentMethod('cash')}
-            style={{ display: 'flex', alignItems: 'center', padding: '16px', borderRadius: '12px', border: paymentMethod === 'cash' ? '2px solid var(--color-primary)' : '1px solid #E0E0E0', cursor: 'pointer', backgroundColor: 'var(--color-white)' }}
-          >
-            <span className="material-icons" style={{ color: paymentMethod === 'cash' ? 'var(--color-primary)' : 'var(--color-gray)', marginRight: '16px' }}>payments</span>
-            <span style={{ fontWeight: 'bold', flex: 1 }}>Cash on Delivery</span>
-            {paymentMethod === 'cash' && <span className="material-icons" style={{ color: 'var(--color-primary)' }}>check_circle</span>}
-          </div>
-        </div>
-
-        {/* Card Form Dummy */}
-        {paymentMethod === 'card' && (
-          <div style={{ backgroundColor: '#F9F9F9', padding: '20px', borderRadius: '12px' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '14px', color: 'var(--color-text-second)', marginBottom: '8px', display: 'block' }}>Cardholder Name</label>
-              <input type="text" placeholder="John Doe" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #E0E0E0', fontSize: '16px' }} />
+        {/* Card List */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+          {cards.length === 0 && (
+            <div className={styles.emptyState} style={{ padding: '40px' }}>
+              <span className="material-icons">credit_card_off</span>
+              <p>No cards saved yet</p>
             </div>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '14px', color: 'var(--color-text-second)', marginBottom: '8px', display: 'block' }}>Card Number</label>
-              <input type="text" placeholder="**** **** **** 1234" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #E0E0E0', fontSize: '16px' }} />
-            </div>
-            <div style={{ display: 'flex', gap: '16px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '14px', color: 'var(--color-text-second)', marginBottom: '8px', display: 'block' }}>Expiry Date</label>
-                <input type="text" placeholder="MM/YY" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #E0E0E0', fontSize: '16px' }} />
+          )}
+
+          {cards.map((card) => (
+            <div
+              key={card.id}
+              style={{
+                background: 'linear-gradient(135deg, #E53935 0%, #C62828 100%)',
+                borderRadius: '20px',
+                padding: '28px',
+                color: 'white',
+                position: 'relative',
+                boxShadow: '0 8px 30px rgba(229, 57, 53, 0.3)',
+                minHeight: '170px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                cursor: 'default',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(229,57,53,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(229,57,53,0.3)'; }}
+            >
+              {/* Top row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="material-icons" style={{ fontSize: '40px', opacity: 0.85 }}>credit_card</span>
+                <span style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '1px' }}>{card.brand}</span>
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '14px', color: 'var(--color-text-second)', marginBottom: '8px', display: 'block' }}>CVV</label>
-                <input type="password" placeholder="***" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #E0E0E0', fontSize: '16px' }} />
+
+              {/* Card Number */}
+              <div style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '3px', margin: '24px 0' }}>
+                **** &nbsp; **** &nbsp; **** &nbsp; {card.last4}
+              </div>
+
+              {/* Bottom row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                  <div style={{ fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Card Holder</div>
+                  <div style={{ fontSize: '15px', fontWeight: '700', marginTop: '3px' }}>{card.holder}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Expires</div>
+                  <div style={{ fontSize: '15px', fontWeight: '700', marginTop: '3px' }}>{card.expiry}</div>
+                </div>
+              </div>
+
+              {/* Delete button */}
+              <button
+                onClick={() => handleDeleteCard(card.id)}
+                style={{
+                  position: 'absolute', top: '14px', right: '14px',
+                  background: 'rgba(255,255,255,0.15)', border: 'none',
+                  borderRadius: '50%', width: '32px', height: '32px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', color: 'white', transition: 'background 0.2s',
+                  backdropFilter: 'blur(4px)',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+              >
+                <span className="material-icons" style={{ fontSize: '18px' }}>close</span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add Card Form */}
+        {showAddForm && (
+          <div className={styles.card} style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+            <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: '700', color: '#1a1a2e' }}>Add New Card</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Card Number</label>
+                <input className={styles.formInput} type="text" placeholder="0000 0000 0000 0000" value={newCard.number} onChange={handleCardNumberChange} style={{ width: '100%', boxSizing: 'border-box', letterSpacing: '2px' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Card Holder Name</label>
+                <input className={styles.formInput} type="text" placeholder="Your Name" value={newCard.holder} onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })} style={{ width: '100%', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Expiry Date</label>
+                  <input className={styles.formInput} type="text" placeholder="MM/YY" value={newCard.expiry} onChange={handleExpiryChange} style={{ width: '100%', boxSizing: 'border-box' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>CVV</label>
+                  <input className={styles.formInput} type="text" placeholder="123" maxLength={3} value={newCard.cvv} onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value.replace(/\D/g, '').slice(0, 3) })} style={{ width: '100%', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button className={styles.btnSecondary} onClick={() => setShowAddForm(false)} style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }}>Cancel</button>
+                <button className={styles.btnPrimary} onClick={handleAddCard} style={{ flex: 1, justifyContent: 'center' }}>Save Card</button>
               </div>
             </div>
           </div>
         )}
 
-        <div style={{ marginTop: 'auto', paddingTop: '40px' }}>
-          <Button onClick={handlePay} disabled={isProcessing || paymentMethod === 'card'}>
-            {isProcessing ? 'Processing API Order...' : paymentMethod === 'card' ? 'Card Payments Disabled in Web Demo' : `Confirm & Place Order`}
-          </Button>
-        </div>
+        {/* Add Button */}
+        {!showAddForm && (
+          <button className={styles.btnPrimary} onClick={() => setShowAddForm(true)} style={{ width: '100%', justifyContent: 'center', padding: '16px' }}>
+            <span className="material-icons" style={{ fontSize: '20px' }}>add</span>
+            Add New Card
+          </button>
+        )}
       </div>
-    </div>
+    </WebLayout>
   );
 };
 

@@ -50,6 +50,11 @@ export const traineeService = {
         return response.data;
     },
 
+    getTraineeSubscriptions: async (traineeId) => {
+        const response = await apiClient.get(`/api/Subscriptions/trainee/${traineeId}`);
+        return response.data;
+    },
+
     subscribe: async (traineeId, trainingPlanId) => {
         const response = await apiClient.post('/api/subscriptions', { traineeId, trainingPlanId });
         return response.data;

@@ -13,7 +13,6 @@ const HeightWeightPage = () => {
 
   const [weight, setWeight] = useState(60);
   const [height, setHeight] = useState(170);
-  const [age, setAge] = useState(25);
   const [targetWeight, setTargetWeight] = useState(65);
   const [gender, setGender] = useState('Male');
 
@@ -31,7 +30,6 @@ const HeightWeightPage = () => {
       confirmPassword: registerData.confirmPassword,
       weight: parseFloat(weight),
       height: parseFloat(height),
-      age: parseInt(age, 10),
       targetWeight: parseFloat(targetWeight),
       gender: gender,
       role: 'Trainee'
@@ -96,7 +94,6 @@ const HeightWeightPage = () => {
           </div>
         </div>
 
-        {renderSelector('Age', age, 10, 100, 'years', setAge)}
         {renderSelector('Height', height, 100, 250, 'cm', setHeight)}
         {renderSelector('Weight', weight, 30, 200, 'kg', setWeight)}
         {renderSelector('Target Weight', targetWeight, 30, 200, 'kg', setTargetWeight)}

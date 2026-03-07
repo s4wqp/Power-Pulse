@@ -37,14 +37,14 @@ const TrainerHomePage = () => {
 
   if (loading) {
     return (
-      <WebLayout title="Dashboard">
+      <WebLayout title="Home">
         <div className={styles.loadingSpinner}><div className={styles.spinner} /></div>
       </WebLayout>
     );
   }
 
   return (
-    <WebLayout title="Trainer Dashboard" subtitle={`Welcome back, ${trainer?.name || user?.fullName || 'Coach'}!`}>
+    <WebLayout title="Trainer Home" subtitle={`Welcome back, ${trainer?.name || user?.fullName || 'Coach'}!`}>
       {/* Stats */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
@@ -55,18 +55,11 @@ const TrainerHomePage = () => {
           <div className={styles.statLabel}>Today's Clients</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(66,133,244,0.1)', color: '#4285f4' }}>
-            <span className="material-icons">payments</span>
-          </div>
-          <div className={styles.statValue}>{stats.todayAmount?.toFixed(0)}</div>
-          <div className={styles.statLabel}>Today's Revenue (EGP)</div>
-        </div>
-        <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'rgba(255,152,0,0.1)', color: '#ff9800' }}>
             <span className="material-icons">account_balance_wallet</span>
           </div>
           <div className={styles.statValue}>{stats.totalAmount?.toFixed(0)}</div>
-          <div className={styles.statLabel}>Total Revenue (EGP)</div>
+          <div className={styles.statLabel}>Total Amount (EGP)</div>
         </div>
       </div>
 
