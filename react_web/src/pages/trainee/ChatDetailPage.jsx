@@ -18,6 +18,7 @@ const ChatDetailPage = () => {
 
   const [newMessage, setNewMessage] = useState('');
   const [showAttach, setShowAttach] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordDuration, setRecordDuration] = useState(0);
   const messagesEndRef = useRef(null);
@@ -221,8 +222,8 @@ const ChatDetailPage = () => {
             <img
               src={fileUrl}
               alt="Sent"
-              style={{ maxWidth: '100%', borderRadius: '12px', display: 'block', maxHeight: '200px', objectFit: 'cover' }}
-              onClick={() => window.open(fileUrl, '_blank')}
+              style={{ maxWidth: '100%', borderRadius: '12px', display: 'block', maxHeight: '200px', objectFit: 'cover', cursor: 'pointer' }}
+              onClick={() => setFullscreenImage(fileUrl)}
             />
           )}
 
@@ -284,137 +285,184 @@ const ChatDetailPage = () => {
   };
 
   return (
-    <div className={styles.pageContainer} style={{ paddingBottom: 0, backgroundColor: 'white' }}>
-      {/* AppBar */}
+    <div className={styles.pageContainer} style={{ padding: 0, backgroundColor: '#eaebed', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+      {/* Central Desktop App Container */}
       <div style={{
-        backgroundColor: 'white', padding: '12px 16px',
-        borderBottom: '1px solid #F0F0F0',
-        display: 'flex', alignItems: 'center', gap: '12px'
+        width: '100%', maxWidth: '1000px',
+        height: '100vh',
+        maxHeight: '100vh',
+        backgroundColor: 'white',
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+        position: 'relative'
       }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <span className="material-icons" style={{ fontSize: '22px' }}>arrow_back_ios</span>
-        </button>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#f0f0f0' }}>
-            {contactImage ? (
-              <CachedImage imageUrl={contactImage} width="100%" height="100%" fit="cover" />
-            ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E8F5E9' }}>
-                <span className="material-icons" style={{ color: '#17A073' }}>person</span>
-              </div>
-            )}
-          </div>
-          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#17A073', border: '2px solid white' }} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#17A073' }}>{contactName}</div>
-          <div style={{ fontSize: '12px', color: '#999' }}>Online</div>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column-reverse', gap: '16px' }}>
-        <div ref={messagesEndRef} />
-        {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#CCC', padding: '40px' }}>No messages yet</div>
-        ) : messages.map((msg, idx) => renderMessage(msg, idx))}
-      </div>
-
-      {/* Hidden file inputs */}
-      <input ref={imageInputRef} type="file" accept="image/*" hidden onChange={(e) => handleFileChange(e, 'Image')} />
-      <input ref={fileInputRef} type="file" hidden onChange={(e) => handleFileChange(e, 'Document')} />
-
-      {/* Attach Bottom Sheet */}
-      {showAttach && (
+        {/* AppBar */}
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 9999,
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
-        }} onClick={() => setShowAttach(false)}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-            backgroundColor: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-            padding: '20px', width: '100%', maxWidth: '500px',
-            animation: 'slideUp 0.25s ease-out'
-          }}>
-            {/* Handle */}
-            <div style={{ width: '40px', height: '4px', backgroundColor: '#DDD', borderRadius: '2px', margin: '0 auto 20px' }} />
-            <h3 style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '18px', margin: '0 0 24px' }}>Share Content</h3>
-
-            {/* Documents */}
-            <div onClick={() => handleFilePick('documents')} style={{
-              display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', cursor: 'pointer'
-            }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(23,160,115,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-icons" style={{ color: '#17A073', fontSize: '24px' }}>description</span>
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', fontSize: '15px' }}>Documents</div>
-                <div style={{ fontSize: '12px', color: '#999' }}>Share your files</div>
-              </div>
+          backgroundColor: 'white', padding: '12px 16px',
+          borderBottom: '1px solid #F0F0F0',
+          display: 'flex', alignItems: 'center', gap: '12px'
+        }}>
+          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <span className="material-icons" style={{ fontSize: '22px' }}>arrow_back_ios</span>
+          </button>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#f0f0f0' }}>
+              {contactImage ? (
+                <CachedImage imageUrl={contactImage} width="100%" height="100%" fit="cover" />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E8F5E9' }}>
+                  <span className="material-icons" style={{ color: '#17A073' }}>person</span>
+                </div>
+              )}
             </div>
-
-            {/* Media */}
-            <div onClick={() => handleFilePick('media')} style={{
-              display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', cursor: 'pointer'
-            }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(23,160,115,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-icons" style={{ color: '#17A073', fontSize: '24px' }}>image</span>
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', fontSize: '15px' }}>Media</div>
-                <div style={{ fontSize: '12px', color: '#999' }}>Share photos and videos</div>
-              </div>
-            </div>
-
-            <div style={{ height: '20px' }} />
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#17A073', border: '2px solid white' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#17A073' }}>{contactName}</div>
+            <div style={{ fontSize: '12px', color: '#999' }}>Online</div>
           </div>
         </div>
-      )}
 
-      {/* Input Area */}
-      <div style={{ padding: '12px 16px 20px', backgroundColor: 'white' }}>
-        <form onSubmit={handleSend} style={{
-          display: 'flex', alignItems: 'center', gap: '10px',
-          padding: '8px 16px',
-          borderRadius: '30px',
-          backgroundColor: 'white',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-        }}>
-          {!isRecording ? (
-            <>
-              <span className="material-icons" style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>emoji_emotions</span>
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Start typing..."
-                style={{ flex: 1, padding: '8px 0', border: 'none', outline: 'none', fontSize: '14px', backgroundColor: 'transparent', color: '#333' }}
-              />
-              <span className="material-icons" onClick={startRecording} style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>mic_none</span>
-              <span className="material-icons" onClick={() => setShowAttach(true)} style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>attach_file</span>
-              <button type="submit" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-                <span className="material-icons" style={{ fontSize: '26px', color: '#17A073' }}>send</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <span className="material-icons" onClick={cancelRecording} style={{ fontSize: '26px', color: '#FF3B30', cursor: 'pointer' }}>delete_outline</span>
-              <span className="material-icons" style={{ fontSize: '12px', color: '#FF3B30' }}>circle</span>
-              <span style={{ color: '#FF3B30', fontWeight: 'bold', fontSize: '14px', flex: 1 }}>
-                Recording... {formatRecordDuration(recordDuration)}
-              </span>
-              <span className="material-icons" onClick={sendRecording} style={{ fontSize: '28px', color: '#17A073', cursor: 'pointer' }}>send</span>
-            </>
-          )}
-        </form>
-      </div>
+        {/* Messages */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column-reverse', gap: '16px' }}>
+          <div ref={messagesEndRef} />
+          {messages.length === 0 ? (
+            <div style={{ textAlign: 'center', color: '#CCC', padding: '40px' }}>No messages yet</div>
+          ) : messages.map((msg, idx) => renderMessage(msg, idx))}
+        </div>
 
-      <style>{`
+        {/* Hidden file inputs */}
+        <input ref={imageInputRef} type="file" accept="image/*" hidden onChange={(e) => handleFileChange(e, 'Image')} />
+        <input ref={fileInputRef} type="file" hidden onChange={(e) => handleFileChange(e, 'Document')} />
+
+        {/* Attach Bottom Sheet */}
+        {showAttach && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 9999,
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+          }} onClick={() => setShowAttach(false)}>
+            <div onClick={(e) => e.stopPropagation()} style={{
+              backgroundColor: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
+              padding: '20px', width: '100%', maxWidth: '500px',
+              animation: 'slideUp 0.25s ease-out'
+            }}>
+              {/* Handle */}
+              <div style={{ width: '40px', height: '4px', backgroundColor: '#DDD', borderRadius: '2px', margin: '0 auto 20px' }} />
+              <h3 style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '18px', margin: '0 0 24px' }}>Share Content</h3>
+
+              {/* Documents */}
+              <div onClick={() => handleFilePick('documents')} style={{
+                display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', cursor: 'pointer'
+              }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(23,160,115,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-icons" style={{ color: '#17A073', fontSize: '24px' }}>description</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '15px' }}>Documents</div>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Share your files</div>
+                </div>
+              </div>
+
+              {/* Media */}
+              <div onClick={() => handleFilePick('media')} style={{
+                display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', cursor: 'pointer'
+              }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(23,160,115,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-icons" style={{ color: '#17A073', fontSize: '24px' }}>image</span>
+                </div>
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '15px' }}>Media</div>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Share photos and videos</div>
+                </div>
+              </div>
+
+              <div style={{ height: '20px' }} />
+            </div>
+          </div>
+        )}
+
+        {/* Input Area — check if subscription ended (like mobile) */}
+        {(() => {
+          const latestStatusMsg = messages.find(msg => {
+            const c = (msg.message || msg.content || '').toLowerCase();
+            return (c.includes('subscription') && (c.includes('ended') || c.includes('expired'))) ||
+              c.includes('ai performance report') ||
+              c.includes('welcome to the');
+          });
+          const isSubEnded = latestStatusMsg &&
+            !(latestStatusMsg.message || latestStatusMsg.content || '').toLowerCase().includes('welcome to the');
+
+          if (isSubEnded) {
+            return (
+              <div style={{ padding: '16px 20px 24px', backgroundColor: 'white' }}>
+                <div style={{
+                  padding: '14px', backgroundColor: '#F5F5F5', borderRadius: '12px',
+                  textAlign: 'center', color: '#888', fontWeight: 'bold', fontSize: '14px',
+                }}>
+                  Chat is closed. Subscription has ended.
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ padding: '12px 16px 20px', backgroundColor: 'white' }}>
+              <form onSubmit={handleSend} style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '8px 16px', borderRadius: '30px',
+                backgroundColor: 'white', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              }}>
+                {!isRecording ? (
+                  <>
+                    <span className="material-icons" style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>emoji_emotions</span>
+                    <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Start typing..."
+                      style={{ flex: 1, padding: '8px 0', border: 'none', outline: 'none', fontSize: '14px', backgroundColor: 'transparent', color: '#333' }} />
+                    <span className="material-icons" onClick={startRecording} style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>mic_none</span>
+                    <span className="material-icons" onClick={() => setShowAttach(true)} style={{ fontSize: '24px', color: '#CCC', cursor: 'pointer' }}>attach_file</span>
+                    <button type="submit" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                      <span className="material-icons" style={{ fontSize: '26px', color: '#17A073' }}>send</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons" onClick={cancelRecording} style={{ fontSize: '26px', color: '#FF3B30', cursor: 'pointer' }}>delete_outline</span>
+                    <span className="material-icons" style={{ fontSize: '12px', color: '#FF3B30' }}>circle</span>
+                    <span style={{ color: '#FF3B30', fontWeight: 'bold', fontSize: '14px', flex: 1 }}>Recording... {formatRecordDuration(recordDuration)}</span>
+                    <span className="material-icons" onClick={sendRecording} style={{ fontSize: '28px', color: '#17A073', cursor: 'pointer' }}>send</span>
+                  </>
+                )}
+              </form>
+            </div>
+          );
+        })()}
+
+        {/* Fullscreen Image Viewer */}
+        {fullscreenImage && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 10000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'zoom-out'
+          }} onClick={() => setFullscreenImage(null)}>
+            <img src={fullscreenImage} alt="Fullscreen" style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
+            <button style={{
+              position: 'absolute', top: '20px', right: '20px',
+              background: 'none', border: 'none', color: 'white', cursor: 'pointer'
+            }} onClick={(e) => { e.stopPropagation(); setFullscreenImage(null); }}>
+              <span className="material-icons" style={{ fontSize: '30px' }}>close</span>
+            </button>
+          </div>
+        )}
+
+        <style>{`
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
         }
       `}</style>
+      </div> {/* End Central App Container */}
     </div>
   );
 };

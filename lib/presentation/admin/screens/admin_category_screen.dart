@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:power_pulse/custom.dart';
 import 'package:power_pulse/routing.dart';
 import 'package:power_pulse/data/network/api_client.dart';
+import 'package:provider/provider.dart';
+import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 
 class AdminCategoryScreen extends StatefulWidget {
   final String categoryType;
@@ -77,7 +79,10 @@ class _AdminCategoryScreenState extends State<AdminCategoryScreen> {
     if (productId == 0) return;
 
     try {
-      final response = await ApiClient().dio.delete('/api/Products/$productId');
+      final adminId = Provider.of<AuthProvider>(context, listen: false).userId;
+      final response = await ApiClient().dio.delete(
+        '/api/Products/$productId?adminId=$adminId',
+      );
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (mounted) {
           setState(() {
@@ -89,9 +94,9 @@ class _AdminCategoryScreenState extends State<AdminCategoryScreen> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to delete item')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete item: ${e.toString()}')),
+      );
     }
   }
 

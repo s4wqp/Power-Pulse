@@ -115,22 +115,17 @@ class _TrainerAddPlanScreenState extends State<TrainerAddPlanScreen> {
         'isActive': true,
       };
 
+      planData['durationMonths'] = 0;
+      planData['durationDays'] = 0;
+      planData['durationHours'] = 0.0;
+
       if (_durationUnit == 'Months') {
-        planData['durationMonths'] = durationValue;
-        planData['durationDays'] = 0.0;
-        planData['durationHours'] = 0.0;
+        planData['durationMonths'] = durationValue.round();
       } else if (_durationUnit == 'Days') {
-        planData['durationMonths'] = 0.0;
-        planData['durationDays'] = durationValue;
-        planData['durationHours'] = 0.0;
+        planData['durationDays'] = durationValue.round();
       } else if (_durationUnit == 'Hours') {
-        planData['durationMonths'] = 0.0;
-        planData['durationDays'] = 0.0;
         planData['durationHours'] = durationValue;
       } else if (_durationUnit == 'Minutes') {
-        planData['durationMonths'] = 0.0;
-        planData['durationDays'] = 0.0;
-        // Convert minutes to fractional hours
         planData['durationHours'] = durationValue / 60.0;
       }
 

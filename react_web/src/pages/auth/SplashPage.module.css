@@ -1,13 +1,30 @@
 .container {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-white);
+    background: linear-gradient(135deg, #0a0a0a 0%, #0d1f15 40%, #1a2a1d 70%, #0a0a0a 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(23, 160, 115, 0.12) 0%, transparent 60%);
+    pointer-events: none;
 }
 
 .logo {
     width: 200px;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 40px rgba(23, 160, 115, 0.4));
     animation: slideFadeScale 2.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
@@ -25,5 +42,82 @@
     100% {
         opacity: 1;
         transform: translateY(0) scale(1.0);
+    }
+}
+
+.loadingBar {
+    width: 120px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    margin-top: 40px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+}
+
+.loadingBarFill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #17A073, #2dd4a0);
+    border-radius: 2px;
+    animation: loadProgress 2.5s ease-in-out forwards;
+    box-shadow: 0 0 8px rgba(23, 160, 115, 0.5);
+}
+
+@keyframes loadProgress {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+/* Floating animated icons */
+.floatingIcon {
+    position: absolute;
+    color: rgba(23, 160, 115, 0.12);
+    pointer-events: none;
+    user-select: none;
+    filter: drop-shadow(0 0 20px rgba(23, 160, 115, 0.25));
+}
+
+.icon1 {
+    top: 10%;
+    left: 10%;
+    font-size: 260px;
+    animation: floatSplash1 12s ease-in-out infinite;
+}
+
+.icon2 {
+    bottom: 10%;
+    right: 10%;
+    font-size: 200px;
+    animation: floatSplash2 10s ease-in-out infinite;
+}
+
+@keyframes floatSplash1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(30px, -40px) rotate(15deg);
+    }
+}
+
+@keyframes floatSplash2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(-25px, 30px) rotate(-15deg);
     }
 }

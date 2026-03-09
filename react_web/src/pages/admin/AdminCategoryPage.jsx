@@ -16,6 +16,8 @@ const AdminCategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { user } = useAuthStore();
+
   useEffect(() => {
     fetchProducts();
   }, [categoryType]);
@@ -46,11 +48,13 @@ const AdminCategoryPage = () => {
   const handleDelete = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
-      await productService.deleteProduct(productId);
+      await productService.deleteProduct(productId, user?.id);
       setItems(prev => prev.filter(i => i.id !== productId));
       toast.success('Item deleted successfully');
-    } catch {
-      toast.error('Failed to delete item');
+    } catch (err) {
+      console.error('Delete failed:', err?.response?.status, err?.response?.data, err);
+      const msg = err?.response?.data?.message || err?.response?.data || err?.message || 'Unknown error';
+      toast.error(`Failed to delete item: ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`);
     }
   };
 

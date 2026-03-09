@@ -83,23 +83,18 @@ const TrainerAddPlanPage = () => {
       badge: badge.trim() || null,
       features: finalFeatures,
       isActive: existingPlan ? existingPlan.isActive : true,
+      durationMonths: 0,
+      durationDays: 0,
+      durationHours: 0,
     };
 
     if (durationUnit === 'Months') {
       planData.durationMonths = durationNum;
-      planData.durationDays = 0;
-      planData.durationHours = 0;
     } else if (durationUnit === 'Days') {
-      planData.durationMonths = 0;
       planData.durationDays = durationNum;
-      planData.durationHours = 0;
     } else if (durationUnit === 'Hours') {
-      planData.durationMonths = 0;
-      planData.durationDays = 0;
       planData.durationHours = durationNum;
     } else if (durationUnit === 'Minutes') {
-      planData.durationMonths = 0;
-      planData.durationDays = 0;
       planData.durationHours = durationNum / 60.0;
     }
 
@@ -109,12 +104,13 @@ const TrainerAddPlanPage = () => {
         await trainerService.updatePlan(user.id, existingPlan.id || existingPlan.trainingPlanId, planData);
         toast.success('Plan updated successfully');
       } else {
-        await trainerService.addPlan(user.id, planData);
+        await trainerService.createPlan(user.id, planData);
         toast.success('Plan created successfully');
       }
       navigate(-1);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save plan');
+      console.error('Plan save error:', err.response?.status, err.response?.data);
+      toast.error(err.response?.data?.message || err.response?.data?.title || 'Failed to save plan');
     } finally {
       setIsLoading(false);
     }
@@ -142,31 +138,31 @@ const TrainerAddPlanPage = () => {
         </div>
 
         <div style={{ padding: '24px', display: 'flex', justifyContent: 'center' }}>
-          <form onSubmit={handleSave} style={{
+          <form onSubmit={handleSave} autoComplete="off" style={{
             width: '100%', maxWidth: '700px', display: 'flex', flexDirection: 'column', gap: '20px',
             backgroundColor: '#fff', padding: '32px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
           }}>
 
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#555', marginBottom: '8px' }}>Plan Title</label>
-              <input className={styles.formInput} value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., 1 Month Coaching" style={{ width: '100%', boxSizing: 'border-box' }} />
+              <input className={styles.formInput} value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., 1 Month Coaching" style={{ width: '100%', boxSizing: 'border-box' }} name="planTitle_new" autoComplete="off" />
             </div>
 
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#555', marginBottom: '8px' }}>Description</label>
-              <textarea className={styles.formInput} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter plan description" rows={3} style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
+              <textarea className={styles.formInput} value={description} onChange={e => setDescription(e.target.value)} placeholder="Enter plan description" rows={3} style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }} name="planDescription_new" autoComplete="off" />
             </div>
 
             <div style={{ display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#555', marginBottom: '8px' }}>Price (EGP)</label>
-                <input className={styles.formInput} type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 100" style={{ width: '100%', boxSizing: 'border-box' }} />
+                <input className={styles.formInput} type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 100" style={{ width: '100%', boxSizing: 'border-box' }} name="planPrice_new" autoComplete="off" />
               </div>
 
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#555', marginBottom: '8px' }}>Duration</label>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <input className={styles.formInput} type="number" value={durationVal} onChange={e => setDurationVal(e.target.value)} placeholder="e.g., 1" style={{ flex: 2, boxSizing: 'border-box' }} />
+                  <input className={styles.formInput} type="number" value={durationVal} onChange={e => setDurationVal(e.target.value)} placeholder="e.g., 1" style={{ flex: 2, boxSizing: 'border-box' }} name="planDuration_new" autoComplete="off" />
                   <select
                     value={durationUnit} onChange={e => setDurationUnit(e.target.value)}
                     style={{
@@ -185,7 +181,7 @@ const TrainerAddPlanPage = () => {
 
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#555', marginBottom: '8px' }}>Badge (Optional)</label>
-              <input className={styles.formInput} value={badge} onChange={e => setBadge(e.target.value)} placeholder="e.g., Save 20%" style={{ width: '100%', boxSizing: 'border-box' }} />
+              <input className={styles.formInput} value={badge} onChange={e => setBadge(e.target.value)} placeholder="e.g., Save 20%" style={{ width: '100%', boxSizing: 'border-box' }} name="planBadge_new" autoComplete="off" />
             </div>
 
             <div style={{ marginTop: '12px' }}>
@@ -202,7 +198,15 @@ const TrainerAddPlanPage = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {features.map((f, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <input className={styles.formInput} value={f} onChange={e => handleFeatureChange(i, e.target.value)} placeholder="Enter feature description" style={{ flex: 1 }} />
+                    <input
+                      className={styles.formInput}
+                      value={f}
+                      onChange={e => handleFeatureChange(i, e.target.value)}
+                      placeholder="Enter feature description"
+                      style={{ flex: 1 }}
+                      name={`feature_${i}`}
+                      autoComplete="off"
+                    />
                     {features.length > 1 && (
                       <button type="button" onClick={() => handleRemoveFeature(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ff8a8a', padding: 0, display: 'flex' }}>
                         <span className="material-icons" style={{ fontSize: '22px' }}>remove_circle</span>

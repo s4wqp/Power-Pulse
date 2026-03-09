@@ -81,9 +81,11 @@ const useTraineeStore = create((set) => ({
             }));
             return true;
         } catch (error) {
-            console.error('Failed to add address:', error);
-            set({ error: error.message, isLoading: false });
-            return false;
+            console.error('Failed to add address:', error.response?.data || error);
+            const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to add address';
+            set({ error: errorMessage, isLoading: false });
+            // Provide exact message back so components can show it
+            return { success: false, message: errorMessage };
         }
     },
 

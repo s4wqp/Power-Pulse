@@ -3,13 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import useCartStore from '../../stores/cartStore';
 import useTraineeStore from '../../stores/traineeStore';
 import useAuthStore from '../../stores/authStore';
-import Button from '../../components/Button';
-import CachedImage from '../../components/CachedImage';
 import { showToast } from '../../utils/custom';
-import styles from './Trainee.module.css';
+import WebLayout from '../../components/WebLayout';
+import styles from '../../components/WebLayout.module.css';
 
 // Import Assets
-import MapImage from '../../assets/images/bg_appbar.png';
 import ApplePay from '../../assets/images/ApplePay.png';
 import Mastercard from '../../assets/images/Mastercard.png';
 import Visa from '../../assets/images/Visa.png';
@@ -24,30 +22,28 @@ import L from 'leaflet';
 // Custom Marker Icon definition
 const customMarkerIcon = new L.divIcon({
   className: 'custom-map-marker',
-  html: `<div style="width: 24px; height: 32px; background: linear-gradient(135deg, #F44336, #D32F2F); border-radius: 12px 12px 12px 0; border: 2px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);"><div style="width: 8px; height: 8px; background-color: white; border-radius: 50%;"></div></div>`,
-  iconSize: [24, 32],
-  iconAnchor: [12, 32]
+  html: `<div style="width: 28px; height: 38px; background: linear-gradient(135deg, #17A073, #12825d); border-radius: 14px 14px 14px 0; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 12px rgba(23, 160, 115, 0.4); transform: rotate(-45deg);"><div style="width: 10px; height: 10px; background-color: white; border-radius: 50%;"></div></div>`,
+  iconSize: [28, 38],
+  iconAnchor: [14, 38]
 });
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { items } = useCartStore();
+  const { items, clearCart } = useCartStore();
   const { user } = useAuthStore();
   const { addresses, fetchAddresses, isLoading, placeOrder } = useTraineeStore();
 
-  // Use the address selected from the cart bottom-sheet if provided
   const [selectedAddressId, setSelectedAddressId] = useState(location.state?.selectedAddressId || null);
-  const [paymentMethod, setPaymentMethod] = useState('apple_pay'); // apple_pay, card, paypal, fawry
+  const [paymentMethod, setPaymentMethod] = useState('apple_pay');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSuccessAnimating, setIsSuccessAnimating] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
       fetchAddresses(user.id);
     }
   }, [user, fetchAddresses]);
-
-  const [isSuccessAnimating, setIsSuccessAnimating] = useState(false);
 
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddressId) {
@@ -56,24 +52,20 @@ const CheckoutPage = () => {
   }, [addresses, selectedAddressId]);
 
   const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 20; // Hardcoded to match mobile design
+  const deliveryFee = 20;
   const serviceFee = 0;
   const grandTotal = totalAmount + deliveryFee + serviceFee;
 
   const selectedAddress = addresses.find(a => a.id === selectedAddressId) || addresses[0];
 
   if (items.length === 0 && !isProcessing && !isSuccessAnimating) {
-    // Only redirect back to cart if we aren't actively processing a successful order!
     navigate('/trainee/cart', { replace: true });
     return null;
   }
 
   const completeOrderSequence = () => {
-    const clearCart = useCartStore.getState().clearCart;
     setIsProcessing(false);
     setIsSuccessAnimating(true);
-
-    // Allow the success animation to play out for 1.8 seconds before redirecting
     setTimeout(() => {
       clearCart();
       setIsSuccessAnimating(false);
@@ -83,12 +75,10 @@ const CheckoutPage = () => {
 
   const handleConfirmOrder = async () => {
     if (paymentMethod === 'card') {
-      // Route to card dummy form
       navigate('/trainee/payment-details', { state: { addressId: selectedAddressId } });
       return;
     }
 
-    // Direct place order for other methods
     if (!user?.id) return;
     setIsProcessing(true);
 
@@ -105,169 +95,285 @@ const CheckoutPage = () => {
     };
 
     try {
-      const orderResponse = await placeOrder(orderData);
-
-      // Simulate payment processing time so the user sees the spinner
+      await placeOrder(orderData);
       setTimeout(completeOrderSequence, 1500);
-
     } catch (e) {
       console.error(e);
-      // Simulate processing time even on error for strict UI demonstration
       setTimeout(completeOrderSequence, 1500);
     }
   };
 
+  const PaymentOption = ({ value, iconContent }) => {
+    const isSelected = paymentMethod === value;
+    return (
+      <div
+        onClick={() => setPaymentMethod(value)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 20px',
+          backgroundColor: isSelected ? 'rgba(23, 160, 115, 0.04)' : '#fff',
+          border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'rgba(0,0,0,0.08)'}`,
+          borderRadius: '12px',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {iconContent}
+        </div>
+        <div style={{
+          width: '20px', height: '20px', borderRadius: '50%',
+          border: `2px solid ${isSelected ? 'var(--color-primary)' : '#ccc'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent'
+        }}>
+          {isSelected && <div style={{ width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '50%' }} />}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className={styles.pageContainer}>
+    <WebLayout title="Checkout" subtitle="Review your order and securely complete your purchase" onBack={() => navigate(-1)}>
+      <div className={styles.container} style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', paddingBottom: '80px' }}>
 
-      {/* Fullscreen Loading Overlay added here */}
-      {(isProcessing || isSuccessAnimating) && (
-        <div className={styles.loadingOverlay}>
-          {isProcessing ? (
-            <>
-              <div className={styles.spinner}></div>
-              <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '18px', marginTop: '16px', fontFamily: 'var(--font-family)' }}>
-                Processing Payment...
-              </div>
-            </>
-          ) : (
-            <div className={styles.successAnimationContainer} style={{ transform: 'scale(1.5)' }}>
-              <svg className={styles.checkmark} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle className={styles.checkmarkCircle} cx="26" cy="26" r="25" fill="none" />
-                <path className={styles.checkmarkCheck} fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
-            </div>
-          )}
-        </div>
-      )}
-      <div className={styles.appBar}>
-        <div className={styles.headerRow} style={{ marginBottom: 0 }}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <span className="material-icons">arrow_back_ios</span>
-          </button>
-          <span style={{ fontSize: '20px', fontWeight: 'bold' }}>Checkout</span>
-        </div>
-      </div>
-
-      <div className={styles.scrollContent}>
-        {/* Address Card Redesign */}
-        <div style={{ marginBottom: '24px' }}>
-          {isLoading ? (
-            <div style={{ padding: '16px', textAlign: 'center', color: '#888' }}>Loading address...</div>
-          ) : selectedAddress ? (
-            <div style={{ backgroundColor: '#fff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #EAEAEA' }}>
-              {/* Live Interactive Map Section */}
-              <div style={{ height: '140px', width: '100%', position: 'relative' }}>
-                <MapContainer
-                  center={[30.0444, 31.2357]} // Default map center (Cairo roughly)
-                  zoom={13}
-                  style={{ height: '100%', width: '100%', borderRadius: '24px 24px 0 0' }}
-                  zoomControl={false}
-                  attributionControl={false}
-                >
-                  <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                  <Marker position={[30.0444, 31.2357]} icon={customMarkerIcon} />
-                </MapContainer>
-              </div>
-              <div style={{ padding: '16px 20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontWeight: 'bold', fontSize: '18px', color: 'var(--color-primary)', marginBottom: '4px' }}>{selectedAddress.building || 'antili - yttgg'}</div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', color: 'var(--color-primary)', fontSize: '14px', gap: '4px' }}>
-                      <span className="material-icons" style={{ fontSize: '16px', marginTop: '2px' }}>location_on</span>
-                      <span>Apt {selectedAddress.apartment || '56'}, Floor {selectedAddress.floor || '4'},<br />Phone number : +20 {selectedAddress.phone || '+201123698854'}</span>
-                    </div>
-                  </div>
-                  <button onClick={() => navigate('/trainee/addresses')} style={{ color: 'var(--color-primary)', background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px' }}>
-                    Change
-                  </button>
+        {/* Fullscreen Loading Overlay */}
+        {(isProcessing || isSuccessAnimating) && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(255,255,255,0.95)', zIndex: 9999,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+          }}>
+            {isProcessing ? (
+              <>
+                <div style={{
+                  width: '50px', height: '50px', border: '4px solid rgba(23, 160, 115, 0.2)',
+                  borderTopColor: 'var(--color-primary)', borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                <div style={{ color: '#222', fontWeight: '600', fontSize: '20px', marginTop: '24px' }}>
+                  Processing secure payment...
                 </div>
+              </>
+            ) : (
+              <div style={{ transform: 'scale(1.5)', color: 'var(--color-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span className="material-icons" style={{ fontSize: '64px', color: 'var(--color-primary)' }}>check_circle</span>
+                <span style={{ fontSize: '18px', fontWeight: '700', marginTop: '16px', color: '#111' }}>Payment Successful!</span>
               </div>
-            </div>
-          ) : (
-            <div
-              onClick={() => navigate('/trainee/addresses/new')}
-              style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(23, 160, 115, 0.1)', padding: '16px', borderRadius: '12px', cursor: 'pointer' }}>
-              <span className="material-icons" style={{ color: 'var(--color-primary)', marginRight: '16px', fontSize: '28px' }}>add_circle_outline</span>
-              <div style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Add a Delivery Address</div>
-            </div>
-          )}
-        </div>
+            )}
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
 
-        {/* Payment Methods */}
-        <div style={{ marginBottom: '24px' }}>
-          <span style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', display: 'block', color: '#2C3E50' }}>Payment method</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* 2-Column E-commerce Layout */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '40px',
+          alignItems: 'flex-start',
+          marginTop: '20px'
+        }}>
 
-            {/* Apple Pay */}
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" value="apple_pay" checked={paymentMethod === 'apple_pay'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }} />
-              <div style={{ marginLeft: '16px', padding: '8px 16px', border: '1px solid #E0E0E0', borderRadius: '8px', backgroundColor: '#fff' }}>
-                <img src={ApplePay} alt="Apple Pay" style={{ height: '20px', objectFit: 'contain' }} />
+          {/* Left Column: Forms & Details */}
+          <div style={{
+            flex: '1 1 600px',
+            minWidth: 0, // Prevent flex item from overflowing
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px'
+          }}>
+
+            {/* Delivery Address Section */}
+            <section>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#111', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>1</div>
+                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#111' }}>Shipping Address</h2>
               </div>
-            </label>
 
-            {/* Credit Card (Visa/Mastercard) */}
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" value="card" checked={paymentMethod === 'card'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }} />
-              <div style={{ marginLeft: '16px', padding: '8px 16px', border: '1px solid #E0E0E0', borderRadius: '8px', backgroundColor: '#fff', display: 'flex', gap: '8px' }}>
-                <img src={Mastercard} alt="Mastercard" style={{ height: '20px', objectFit: 'contain' }} />
-                <img src={Visa} alt="Visa" style={{ height: '20px', objectFit: 'contain' }} />
-              </div>
-            </label>
+              {isLoading ? (
+                <div style={{ padding: '32px', textAlign: 'center', color: '#888', backgroundColor: '#f9f9f9', borderRadius: '12px', border: '1px solid #eaeaea' }}>
+                  Loading address...
+                </div>
+              ) : selectedAddress ? (
+                <div style={{
+                  backgroundColor: '#fff', borderRadius: '16px', overflow: 'hidden',
+                  border: '1px solid #eaeaea'
+                }}>
+                  <div style={{ height: '160px', width: '100%', position: 'relative' }}>
+                    <MapContainer
+                      center={[30.0444, 31.2357]}
+                      zoom={14}
+                      style={{ height: '100%', width: '100%' }}
+                      zoomControl={false}
+                      attributionControl={false}
+                      dragging={false}
+                      scrollWheelZoom={false}
+                    >
+                      <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                      <Marker position={[30.0444, 31.2357]} icon={customMarkerIcon} />
+                    </MapContainer>
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px',
+                      background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))', zIndex: 400
+                    }} />
+                  </div>
 
-            {/* PayPal */}
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" value="paypal" checked={paymentMethod === 'paypal'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }} />
-              <div style={{ marginLeft: '16px', padding: '8px 16px', border: '1px solid #E0E0E0', borderRadius: '8px', backgroundColor: '#fff' }}>
-                <img src={PayPal} alt="PayPal" style={{ height: '20px', objectFit: 'contain' }} />
-              </div>
-            </label>
+                  <div style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '48px', height: '48px', backgroundColor: '#f5f5f5', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span className="material-icons" style={{ color: '#555' }}>location_city</span>
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '16px', color: '#111', marginBottom: '6px' }}>
+                          {selectedAddress.building || 'Home'} — Apt {selectedAddress.apartment || '56'}, Floor {selectedAddress.floor || '4'}
+                        </div>
+                        <div style={{ color: '#666', fontSize: '15px', lineHeight: '1.5' }}>
+                          {selectedAddress.street || 'Main Street, Building 123'}
+                          <br />
+                          Contact: {selectedAddress.phone || '+201123698854'}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigate('/trainee/addresses')}
+                      style={{
+                        color: '#111', background: '#f5f5f5',
+                        border: '1px solid #ddd', fontWeight: '600', padding: '8px 16px', borderRadius: '8px',
+                        cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => e.target.style.background = '#ebebeb'}
+                      onMouseOut={(e) => e.target.style.background = '#f5f5f5'}
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => navigate('/trainee/addresses/new')}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px',
+                    border: '2px dashed #ccc', backgroundColor: '#fafafa',
+                    padding: '40px 20px', borderRadius: '16px', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
+                >
+                  <span className="material-icons" style={{ color: '#666', fontSize: '32px' }}>add_location_alt</span>
+                  <div style={{ fontWeight: '600', color: '#444', fontSize: '16px' }}>Add a Delivery Address</div>
+                </div>
+              )}
+            </section>
 
-            {/* Fawry */}
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" value="fawry" checked={paymentMethod === 'fawry'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '20px', height: '20px', accentColor: 'var(--color-primary)' }} />
-              <div style={{ marginLeft: '16px', padding: '8px 16px', border: '1px solid #E0E0E0', borderRadius: '8px', backgroundColor: '#fff' }}>
-                <img src={Fawry} alt="Fawry" style={{ height: '20px', objectFit: 'contain' }} />
+            <hr style={{ border: 'none', borderTop: '1px solid #eaeaea', margin: '8px 0' }} />
+
+            {/* Payment Methods Section */}
+            <section>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#111', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>2</div>
+                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: '#111' }}>Payment Method</h2>
               </div>
-            </label>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <PaymentOption
+                  value="apple_pay"
+                  iconContent={<><img src={ApplePay} alt="Apple Pay" style={{ height: '24px', objectFit: 'contain' }} /><span style={{ fontWeight: '600', color: '#333' }}>Apple Pay</span></>}
+                />
+                <PaymentOption
+                  value="card"
+                  iconContent={<><div style={{ display: 'flex', gap: '6px' }}><img src={Mastercard} alt="Mastercard" style={{ height: '18px', objectFit: 'contain' }} /><img src={Visa} alt="Visa" style={{ height: '18px', objectFit: 'contain' }} /></div><span style={{ fontWeight: '600', color: '#333' }}>Credit / Debit Card</span></>}
+                />
+                <PaymentOption
+                  value="paypal"
+                  iconContent={<><img src={PayPal} alt="PayPal" style={{ height: '20px', objectFit: 'contain' }} /><span style={{ fontWeight: '600', color: '#333' }}>PayPal</span></>}
+                />
+                <PaymentOption
+                  value="fawry"
+                  iconContent={<><img src={Fawry} alt="Fawry" style={{ height: '20px', objectFit: 'contain' }} /><span style={{ fontWeight: '600', color: '#333' }}>Fawry Pay</span></>}
+                />
+              </div>
+            </section>
 
           </div>
-        </div>
 
-        {/* Payment Summary */}
-        <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid transparent' }}>
-          <span style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '20px', display: 'block', color: '#2C3E50' }}>Payment Summary</span>
+          {/* Right Column: Sticky Order Summary */}
+          <div style={{
+            flex: '1 1 350px',
+            minWidth: '300px',
+            maxWidth: '100%'
+          }}>
+            <div style={{
+              position: 'sticky',
+              top: '24px',
+              backgroundColor: '#fff',
+              padding: '28px',
+              borderRadius: '16px',
+              border: '1px solid #eaeaea',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+            }}>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '16px', fontWeight: 'bold' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-primary)' }}>Subtotal</span>
-              <span style={{ color: 'var(--color-primary)' }}>{totalAmount.toFixed(0)} EGP</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-primary)' }}>Delivery fee</span>
-              <span style={{ color: 'var(--color-primary)' }}>{deliveryFee} EGP</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--color-primary)' }}>Service fee</span>
-              <span style={{ color: 'var(--color-primary)' }}>{serviceFee} EGP</span>
-            </div>
+              <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '700', color: '#111' }}>Order Summary</h3>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', margin: '16px 0', fontSize: '18px' }}>
-              <span style={{ color: 'var(--color-primary)' }}>Total amount</span>
-              <span style={{ color: 'var(--color-primary)' }}>{grandTotal.toFixed(0)} EGP</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+                  <span>Items ({items.length})</span>
+                  <span style={{ fontWeight: '600', color: '#111' }}>{totalAmount.toFixed(2)} EGP</span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+                  <span>Shipping & Handling</span>
+                  <span style={{ fontWeight: '600', color: '#111' }}>{deliveryFee.toFixed(2)} EGP</span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+                  <span>Estimated Tax</span>
+                  <span style={{ fontWeight: '600', color: '#111' }}>{serviceFee.toFixed(2)} EGP</span>
+                </div>
+
+                <div style={{ height: '1px', backgroundColor: '#eaeaea', margin: '4px 0' }} />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '22px', fontWeight: '800', color: '#111', marginTop: '4px' }}>
+                  <span>Order Total</span>
+                  <span>{grandTotal.toFixed(2)} <span style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>EGP</span></span>
+                </div>
+
+                <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', lineHeight: '1.4', margin: '8px 0' }}>
+                  By placing your order, you agree to our <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>privacy notice</a> and <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>conditions of use</a>.
+                </div>
+
+                <button
+                  onClick={handleConfirmOrder}
+                  disabled={!selectedAddress || items.length === 0}
+                  className={styles.btnPrimary}
+                  style={{
+                    marginTop: '8px',
+                    width: '100%',
+                    padding: '16px',
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    backgroundColor: 'var(--color-primary)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: (!selectedAddress || items.length === 0) ? 'not-allowed' : 'pointer',
+                    opacity: (!selectedAddress || items.length === 0) ? 0.6 : 1,
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 12px rgba(23, 160, 115, 0.2)'
+                  }}
+                  onMouseOver={(e) => { if (selectedAddress && items.length > 0) e.target.style.transform = 'translateY(-1px)'; }}
+                  onMouseOut={(e) => { if (selectedAddress && items.length > 0) e.target.style.transform = 'translateY(0)'; }}
+                >
+                  Place your order
+                </button>
+              </div>
             </div>
           </div>
 
-          <Button
-            onClick={handleConfirmOrder}
-            disabled={!selectedAddress || isProcessing}
-          >
-            {isProcessing ? 'Processing...' : 'Confirm'}
-          </Button>
         </div>
       </div>
-    </div>
+    </WebLayout>
   );
 };
 

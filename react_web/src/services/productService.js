@@ -22,8 +22,9 @@ export const productService = {
     },
 
     // DELETE /api/Products/{id}
-    deleteProduct: async (id) => {
-        await apiClient.delete(`/api/Products/${id}`);
+    deleteProduct: async (id, adminId) => {
+        const url = adminId ? `/api/Products/${id}?adminId=${adminId}` : `/api/Products/${id}`;
+        await apiClient.delete(url);
     },
 
     // GET /api/referencedata/productcategories?storeType=X

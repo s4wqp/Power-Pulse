@@ -67,3 +67,34 @@ textarea.input {
     font-size: 12px;
     margin-top: 4px;
 }
+
+/* ===== DARK VARIANT ===== */
+.dark .label {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .inputWrapper {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+}
+
+.dark .inputWrapper:focus-within {
+    border-bottom: 2px solid #17A073;
+    box-shadow: 0 2px 8px rgba(23, 160, 115, 0.15);
+}
+
+.dark .input {
+    color: #ffffff;
+}
+
+.dark .input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.dark .toggleBtn {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .toggleBtn:hover {
+    color: rgba(255, 255, 255, 0.8);
+}

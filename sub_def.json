@@ -1,0 +1,16 @@
+{
+  "CreateSubscriptionRequest": {
+    "type": "object",
+    "properties": {
+      "traineeId": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "trainingPlanId": {
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "additionalProperties": false
+  }
+}

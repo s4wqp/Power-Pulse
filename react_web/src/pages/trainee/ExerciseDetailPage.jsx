@@ -28,7 +28,7 @@ const ExerciseDetailPage = () => {
       const now = new Date();
       const isActive = subscriptions.some(sub => {
         if (sub.status === 'Active') return true;
-        if (sub.endDate && new Date(sub.endDate) >= now && new Date(sub.startDate) <= now) return true;
+        if (sub.endDate && new Date(sub.endDate) > now) return true;
         return false;
       });
       setHasActiveSubscription(isActive);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/authStore';
 import Button from '../../components/Button';
-import { Typography, showToast } from '../../utils/custom';
+import { showToast } from '../../utils/custom';
 import styles from './Auth.module.css';
 
 const HeightWeightPage = () => {
@@ -11,15 +11,41 @@ const HeightWeightPage = () => {
   const registerData = location.state?.registerData;
   const { registerTrainee, isLoading } = useAuthStore();
 
-  const [weight, setWeight] = useState(60);
+  // Step 1 = Weight, Step 2 = Height (matching mobile flow)
+  const [step, setStep] = useState(1);
+
+  // Weight state
+  const [weight, setWeight] = useState(70);
+  const [weightUnit, setWeightUnit] = useState('kg');
+
+  // Height state
   const [height, setHeight] = useState(170);
-  const [targetWeight, setTargetWeight] = useState(65);
-  const [gender, setGender] = useState('Male');
+  const [heightUnit, setHeightUnit] = useState('cm');
 
   if (!registerData) {
     navigate('/register/trainee');
     return null;
   }
+
+  const convertWeight = (newUnit) => {
+    if (newUnit === weightUnit) return;
+    if (newUnit === 'lb') {
+      setWeight(Math.round(weight * 2.20462));
+    } else {
+      setWeight(Math.round(weight * 0.453592));
+    }
+    setWeightUnit(newUnit);
+  };
+
+  const convertHeight = (newUnit) => {
+    if (newUnit === heightUnit) return;
+    if (newUnit === 'inches') {
+      setHeight(Math.round(height * 0.393701));
+    } else {
+      setHeight(Math.round(height * 2.54));
+    }
+    setHeightUnit(newUnit);
+  };
 
   const handleRegister = async () => {
     const payload = {
@@ -28,11 +54,8 @@ const HeightWeightPage = () => {
       phone: registerData.phone,
       password: registerData.password,
       confirmPassword: registerData.confirmPassword,
-      weight: parseFloat(weight),
-      height: parseFloat(height),
-      targetWeight: parseFloat(targetWeight),
-      gender: gender,
-      role: 'Trainee'
+      weight: weightUnit === 'kg' ? weight : Math.round(weight * 0.453592),
+      height: heightUnit === 'cm' ? height : Math.round(height * 2.54),
     };
 
     const success = await registerTrainee(payload);
@@ -44,65 +67,128 @@ const HeightWeightPage = () => {
     }
   };
 
-  const renderSelector = (title, value, min, max, unit, setter) => (
-    <div style={{ marginBottom: '24px' }}>
-      <label style={{ fontFamily: 'var(--font-family)', fontSize: '18px', fontWeight: 'bold' }}>
-        {title}
-      </label>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F5F5F5', borderRadius: '12px', padding: '16px', marginTop: '8px' }}>
-        <button type="button" onClick={() => setter(Math.max(min, value - 1))} style={{ width: '40px', height: '40px', borderRadius: '20px', border: 'none', background: '#E0E0E0', fontSize: '20px', cursor: 'pointer' }}>-</button>
-        <span style={{ fontSize: '24px', fontWeight: 'bold' }}>{value} <span style={{ fontSize: '14px', color: '#666' }}>{unit}</span></span>
-        <button type="button" onClick={() => setter(Math.min(max, value + 1))} style={{ width: '40px', height: '40px', borderRadius: '20px', border: 'none', background: 'var(--color-primary)', color: 'white', fontSize: '20px', cursor: 'pointer' }}>+</button>
+  const getWeightRange = () => weightUnit === 'kg' ? { min: 30, max: 200 } : { min: 66, max: 440 };
+  const getHeightRange = () => heightUnit === 'cm' ? { min: 100, max: 250 } : { min: 40, max: 100 };
+
+  const renderRulerPicker = (value, range, unit, onDecrease, onIncrease) => (
+    <div className={styles.selectorRow} style={{ flexDirection: 'column', alignItems: 'center', padding: '40px 20px', borderRadius: '24px' }}>
+      <span style={{ fontSize: '64px', fontWeight: '800', color: '#ffffff', fontFamily: 'var(--font-family)' }}>
+        {value}
+      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginTop: '24px' }}>
+        <button
+          type="button"
+          className={`${styles.selectorBtn} ${styles.selectorBtnMinus}`}
+          style={{ width: '48px', height: '48px' }}
+          onClick={onDecrease}
+        >−</button>
+        <div style={{ width: '120px', height: '2px', background: 'rgba(255,255,255,0.15)', position: 'relative' }}>
+          <div style={{
+            position: 'absolute', top: '-4px', left: '50%', transform: 'translateX(-50%)',
+            width: '2px', height: '10px', background: '#17A073'
+          }}></div>
+        </div>
+        <button
+          type="button"
+          className={`${styles.selectorBtn} ${styles.selectorBtnPlus}`}
+          style={{ width: '48px', height: '48px' }}
+          onClick={onIncrease}
+        >+</button>
       </div>
+      <span style={{ fontSize: '16px', fontWeight: '700', color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>{unit}</span>
+    </div>
+  );
+
+  const renderUnitToggle = (current, options, onToggle) => (
+    <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+      {options.map(opt => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onToggle(opt)}
+          style={{
+            padding: '10px 28px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-family)',
+            fontWeight: '700',
+            fontSize: '14px',
+            transition: 'all 0.2s ease',
+            borderRadius: '24px',
+            background: current === opt ? '#17A073' : 'transparent',
+            color: current === opt ? '#ffffff' : 'rgba(255,255,255,0.35)',
+          }}
+        >{opt}</button>
+      ))}
+    </div>
+  );
+
+  // Progress bar matching mobile
+  const renderProgressBar = () => (
+    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '32px' }}>
+      {[1, 2].map(s => (
+        <div key={s} style={{
+          width: '40px', height: '4px', borderRadius: '2px',
+          background: s === step ? '#17A073' : 'rgba(255,255,255,0.1)',
+          transition: 'background 0.3s ease',
+        }}></div>
+      ))}
     </div>
   );
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.scrollContent}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
-          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <span className="material-icons" style={{ fontSize: '28px' }}>arrow_back_ios</span>
-          </button>
-          <span style={{ fontSize: '20px', fontWeight: 'bold', marginLeft: '10px' }}>Personal Info</span>
-        </div>
+    <div className={styles.centeredLayout}>
+      <div className={styles.formCard} style={{ maxWidth: '520px', textAlign: 'center' }}>
+        {renderProgressBar()}
 
-        <div style={{ marginBottom: '30px' }}>
-          {Typography.mainText('Let\'s know more')}
-          {Typography.mainText('about you')}
-          <p className={styles.subtitle}>Help us tailor your fitness journey.</p>
-        </div>
+        <h1 className={styles.heading} style={{ textAlign: 'center', marginBottom: '24px' }}>
+          What is your<br />
+          <span className={styles.headingGradient}>{step === 1 ? 'weight?' : 'height?'}</span>
+        </h1>
 
-        {/* Gender Selection */}
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{ fontFamily: 'var(--font-family)', fontSize: '18px', fontWeight: 'bold', display: 'block', marginBottom: '12px' }}>
-            Gender
-          </label>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button
-              onClick={() => setGender('Male')}
-              style={{ flex: 1, padding: '16px', borderRadius: '12px', border: gender === 'Male' ? 'none' : '1px solid #E0E0E0', background: gender === 'Male' ? 'var(--color-primary)' : 'white', color: gender === 'Male' ? 'white' : 'black', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              Male
-            </button>
-            <button
-              onClick={() => setGender('Female')}
-              style={{ flex: 1, padding: '16px', borderRadius: '12px', border: gender === 'Female' ? 'none' : '1px solid #E0E0E0', background: gender === 'Female' ? 'var(--color-primary)' : 'white', color: gender === 'Female' ? 'white' : 'black', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              Female
-            </button>
-          </div>
-        </div>
-
-        {renderSelector('Height', height, 100, 250, 'cm', setHeight)}
-        {renderSelector('Weight', weight, 30, 200, 'kg', setWeight)}
-        {renderSelector('Target Weight', targetWeight, 30, 200, 'kg', setTargetWeight)}
-
-        <div className={styles.submitArea} style={{ marginTop: '40px' }}>
-          <Button onClick={handleRegister} disabled={isLoading} className={styles.loginBtn}>
-            {isLoading ? 'Creating Account...' : 'Continue'}
-          </Button>
-        </div>
+        {step === 1 ? (
+          <>
+            {renderUnitToggle(weightUnit, ['kg', 'lb'], convertWeight)}
+            <div style={{ marginTop: '32px' }}>
+              {renderRulerPicker(
+                weight,
+                getWeightRange(),
+                weightUnit,
+                () => setWeight(Math.max(getWeightRange().min, weight - 1)),
+                () => setWeight(Math.min(getWeightRange().max, weight + 1))
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', alignItems: 'center' }}>
+              <button className={styles.backBtn} onClick={() => navigate(-1)} style={{ margin: 0 }}>
+                <span className="material-icons" style={{ fontSize: '20px' }}>arrow_back_ios_new</span>
+              </button>
+              <Button onClick={() => setStep(2)} className={styles.loginBtn} style={{ width: 'auto', padding: '14px 40px' }}>
+                Next
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            {renderUnitToggle(heightUnit, ['inches', 'cm'], convertHeight)}
+            <div style={{ marginTop: '32px' }}>
+              {renderRulerPicker(
+                height,
+                getHeightRange(),
+                heightUnit,
+                () => setHeight(Math.max(getHeightRange().min, height - 1)),
+                () => setHeight(Math.min(getHeightRange().max, height + 1))
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', alignItems: 'center' }}>
+              <button className={styles.backBtn} onClick={() => setStep(1)} style={{ margin: 0 }}>
+                <span className="material-icons" style={{ fontSize: '20px' }}>arrow_back_ios_new</span>
+              </button>
+              <Button onClick={handleRegister} disabled={isLoading} className={styles.loginBtn} style={{ width: 'auto', padding: '14px 40px' }}>
+                {isLoading ? 'Creating...' : 'start now'}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -19,14 +19,22 @@ const SplashPage = () => {
       } else {
         navigate('/login', { replace: true });
       }
-    }, 3000); // 3 second splash
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [navigate, tryAutoLogin, user]);
 
   return (
     <div className={styles.container}>
+      {/* Floating icons */}
+      <span className={`material-icons ${styles.floatingIcon} ${styles.icon1}`}>fitness_center</span>
+      <span className={`material-icons ${styles.floatingIcon} ${styles.icon2}`}>monitor_heart</span>
+
       <img src={logo} alt="Power Pulse Logo" className={styles.logo} />
+
+      <div className={styles.loadingBar}>
+        <div className={styles.loadingBarFill}></div>
+      </div>
     </div>
   );
 };

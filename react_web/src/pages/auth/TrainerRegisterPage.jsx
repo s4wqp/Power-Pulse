@@ -2,102 +2,108 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import TextField from '../../components/TextField';
 import Button from '../../components/Button';
-import { Typography, showToast } from '../../utils/custom';
+import { showToast } from '../../utils/custom';
 import Logo from '../../assets/images/nav.png';
+import BrandLogo from '../../assets/images/Power_Pulse.png';
 import styles from './Auth.module.css';
 
 const TrainerRegisterPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    phoneNumber: '',
+    name: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: ''
   });
 
   const handleChange = (field) => (e) => {
+    // For phone: only allow digits, max 11
+    if (field === 'phone') {
+      const val = e.target.value.replace(/\D/g, '').slice(0, 11);
+      setFormData({ ...formData, [field]: val });
+      return;
+    }
     setFormData({ ...formData, [field]: e.target.value });
   };
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password || !formData.confirmPassword) {
+    const { email, name, password, confirmPassword, phone } = formData;
+
+    if (!email || !name || !password || !confirmPassword || !phone) {
       showToast('Please fill in all fields', true);
       return;
     }
-    if (formData.password !== formData.confirmPassword) {
+    if (!email.includes('@') || !email.includes('.')) {
+      showToast('Please enter a valid email address', true);
+      return;
+    }
+    if (phone.length !== 11) {
+      showToast('Phone number must be exactly 11 digits', true);
+      return;
+    }
+    if (password.length < 8) {
+      showToast('Password must be at least 8 characters long', true);
+      return;
+    }
+    if (password !== confirmPassword) {
       showToast('Passwords do not match', true);
       return;
     }
+
     navigate('/register/trainer/profile', { state: { registerData: formData } });
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.scrollContent}>
-        <img src={Logo} alt="Power Pulse" className={styles.navLogo} />
+    <div className={styles.authLayout}>
+      {/* Decorative Left Panel */}
+      <div className={styles.decorativePanel}>
+        <span className={`material-icons ${styles.floatingIcon} ${styles.floatingIcon1}`}>fitness_center</span>
+        <span className={`material-icons ${styles.floatingIcon} ${styles.floatingIcon2}`}>monitor_heart</span>
+        <span className={`material-icons ${styles.floatingIcon} ${styles.floatingIcon3}`}>sports_gymnastics</span>
+        <span className={`material-icons ${styles.floatingIcon} ${styles.floatingIcon4}`}>sports_martial_arts</span>
+        <img src={BrandLogo} alt="Power Pulse" className={styles.brandLogo} />
+        <p className={styles.brandTagline}>Lead The Way</p>
+      </div>
 
-        <div className={styles.headerArea}>
-          {Typography.mainText('Register As')}
-          {Typography.mainText('a Trainer')}
-          <p className={styles.subtitle}>
-            If you have an account already<br />
-            You can{' '}
-            <Link to="/login" className={styles.linkText}>Sign in !</Link>
-          </p>
-        </div>
+      {/* Form Panel */}
+      <div className={styles.formPanel}>
+        <div className={styles.formCard}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            <span className="material-icons" style={{ fontSize: '20px' }}>arrow_back</span>
+          </button>
 
-        <form onSubmit={handleNext} className={styles.formArea}>
-          <TextField
-            label="Name"
-            placeholder="Enter your Name"
-            icon="person_outline"
-            value={formData.name}
-            onChange={handleChange('name')}
-          />
-          <div className={styles.spacer}></div>
-          <TextField
-            label="Email"
-            placeholder="Enter your email address"
-            icon="email"
-            value={formData.email}
-            onChange={handleChange('email')}
-          />
-          <div className={styles.spacer}></div>
-          <TextField
-            label="Phone Number"
-            placeholder="Enter your Phone Number"
-            icon="phone"
-            value={formData.phoneNumber}
-            onChange={handleChange('phoneNumber')}
-          />
-          <div className={styles.spacer}></div>
-          <TextField
-            label="Password"
-            placeholder="Enter your Password"
-            type="password"
-            icon="lock_outline"
-            value={formData.password}
-            onChange={handleChange('password')}
-          />
-          <div className={styles.spacer}></div>
-          <TextField
-            label="Confirm Password"
-            placeholder="Re-enter your Password"
-            type="password"
-            icon="lock_outline"
-            value={formData.confirmPassword}
-            onChange={handleChange('confirmPassword')}
-          />
-
-          <div className={styles.submitArea} style={{ marginTop: '40px' }}>
-            <Button onClick={handleNext} className={styles.loginBtn}>
-              Next Step
-            </Button>
+          <div className={styles.headerArea}>
+            <h1 className={styles.heading}>
+              Sign <span className={styles.headingGradient}>up</span>
+            </h1>
+            <p className={styles.subtitle}>
+              If you already have an account register<br />
+              You can{' '}
+              <Link to="/login" className={styles.linkText}>Login here !</Link>
+            </p>
           </div>
-        </form>
+
+          <form onSubmit={handleNext} className={styles.formArea}>
+            <TextField label="Email" placeholder="Enter your email address" icon="email" value={formData.email} onChange={handleChange('email')} dark />
+            <div className={styles.spacer}></div>
+            <TextField label="Name" placeholder="Enter your Name" icon="person_outline" value={formData.name} onChange={handleChange('name')} dark />
+            <div className={styles.spacer}></div>
+            <TextField label="Password" placeholder="Enter your Password" type="password" icon="lock_outline" value={formData.password} onChange={handleChange('password')} dark />
+            <div className={styles.spacer}></div>
+            <TextField label="Confirm Password" placeholder="Confirm your Password" type="password" icon="lock_outline" value={formData.confirmPassword} onChange={handleChange('confirmPassword')} dark />
+            <div className={styles.spacer}></div>
+            <TextField label="Phone" placeholder="Enter your phone number" icon="phone" type="tel" value={formData.phone} onChange={handleChange('phone')} dark />
+
+            <div className={styles.submitArea} style={{ marginTop: '32px' }}>
+              <Button onClick={handleNext} className={styles.loginBtn}>
+                Next
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
