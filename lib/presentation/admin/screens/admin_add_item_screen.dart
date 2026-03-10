@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:power_pulse/custom.dart';
 import 'package:power_pulse/data/network/api_client.dart';
-import 'package:provider/provider.dart';
-import 'package:power_pulse/business_logic/providers/auth_provider.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:power_pulse/services/drive_service.dart';
 
@@ -208,12 +207,8 @@ class _AdminAddItemScreenState extends State<AdminAddItemScreen> {
 
       try {
         final apiClient = ApiClient();
-        final adminId = Provider.of<AuthProvider>(
-          context,
-          listen: false,
-        ).userId;
         final response = await apiClient.dio.post(
-          '/api/Products?adminId=$adminId',
+          '/api/Products',
           data: payload,
         );
 

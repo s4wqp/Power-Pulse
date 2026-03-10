@@ -12,7 +12,16 @@ export const traineeService = {
     },
 
     updateProfileImage: async (id, imageUrl) => {
-        const response = await apiClient.put(`/api/trainees/${id}`, { profileImageUrl: imageUrl });
+        const profile = await apiClient.get(`/api/trainees/${id}`);
+        const currentData = profile.data || {};
+        const payload = {
+            name: currentData.name,
+            phone: currentData.phone,
+            weight: currentData.weight,
+            height: currentData.height,
+            profileImageUrl: imageUrl
+        };
+        const response = await apiClient.put(`/api/trainees/${id}`, payload);
         return response.data;
     },
 

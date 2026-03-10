@@ -5,6 +5,7 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 import toast from 'react-hot-toast';
+import useAuthStore from '../../stores/authStore';
 
 const storeTypeMap = { Food: 'HealthyMeals', Supplements: 'Supplements', Clothes: 'Apparel' };
 
@@ -28,6 +29,7 @@ const AdminCategoryPage = () => {
       const storeType = storeTypeMap[categoryType] || 'HealthyMeals';
       const data = await productService.getProducts(storeType);
       setItems((data || []).map(p => ({
+        ...p,
         id: p.id,
         name: p.name || 'Unknown',
         price: p.price || 0,
@@ -113,12 +115,20 @@ const AdminCategoryPage = () => {
                     <td>{item.measure ? `${item.type || 'Supplement'}: ${item.measure}${item.unit}` : item.calories}</td>
                   )}
                   <td>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      style={{ background: 'rgba(255,77,77,0.1)', color: '#ff4d4d', border: 'none', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-                    >
-                      <span className="material-icons" style={{ fontSize: 18 }}>delete</span> Delete
-                    </button>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => navigate(`/admin/category/${categoryType}/add`, { state: { editItem: item } })}
+                        style={{ background: 'rgba(23,160,115,0.1)', color: '#17A073', border: 'none', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <span className="material-icons" style={{ fontSize: 18 }}>edit</span> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        style={{ background: 'rgba(255,77,77,0.1)', color: '#ff4d4d', border: 'none', padding: '8px 12px', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <span className="material-icons" style={{ fontSize: 18 }}>delete</span> Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

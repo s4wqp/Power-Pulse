@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WebLayout from '../../components/WebLayout';
+import { showToast } from '../../utils/custom';
 import styles from '../../components/WebLayout.module.css';
 
 const PaymentDetailsPage = () => {
   const navigate = useNavigate();
 
   const [cards, setCards] = useState([
-    { id: 1, last4: '3212', holder: 'Power Pulse Member', expiry: '12/56', brand: 'Mastercard' },
-    { id: 2, last4: '7777', holder: 'Power Pulse Member', expiry: '08/27', brand: 'Mastercard' },
+    { id: 1, last4: '3212', expiry: '12/56', brand: 'Mastercard' },
+    { id: 2, last4: '7777', expiry: '08/27', brand: 'Mastercard' },
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newCard, setNewCard] = useState({ number: '', holder: '', expiry: '', cvv: '' });
+  const [newCard, setNewCard] = useState({ number: '', expiry: '', cvv: '' });
 
   const handleCardNumberChange = (e) => {
     const val = e.target.value.replace(/\D/g, '');
@@ -27,16 +28,27 @@ const PaymentDetailsPage = () => {
   };
 
   const handleAddCard = () => {
-    if (newCard.number.length < 16) return;
+    if (newCard.number.length !== 16) {
+      showToast('Card number must be exactly 16 digits.', true);
+      return;
+    }
+    if (newCard.cvv.length !== 3) {
+      showToast('CVV must be exactly 3 digits.', true);
+      return;
+    }
+    if (newCard.expiry.length !== 5 || !/^\d{2}\/\d{2}$/.test(newCard.expiry)) {
+      showToast('Expiry date must be in MM/YY format (2 digits / 2 digits).', true);
+      return;
+    }
+
     const card = {
       id: Date.now(),
       last4: newCard.number.slice(-4),
-      holder: newCard.holder || 'Power Pulse Member',
-      expiry: newCard.expiry || 'MM/YY',
+      expiry: newCard.expiry,
       brand: 'Mastercard',
     };
     setCards([...cards, card]);
-    setNewCard({ number: '', holder: '', expiry: '', cvv: '' });
+    setNewCard({ number: '', expiry: '', cvv: '' });
     setShowAddForm(false);
   };
 
@@ -90,11 +102,7 @@ const PaymentDetailsPage = () => {
               </div>
 
               {/* Bottom row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <div>
-                  <div style={{ fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Card Holder</div>
-                  <div style={{ fontSize: '15px', fontWeight: '700', marginTop: '3px' }}>{card.holder}</div>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Expires</div>
                   <div style={{ fontSize: '15px', fontWeight: '700', marginTop: '3px' }}>{card.expiry}</div>
@@ -129,10 +137,6 @@ const PaymentDetailsPage = () => {
               <div>
                 <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Card Number</label>
                 <input className={styles.formInput} type="text" placeholder="0000 0000 0000 0000" value={newCard.number} onChange={handleCardNumberChange} style={{ width: '100%', boxSizing: 'border-box', letterSpacing: '2px' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>Card Holder Name</label>
-                <input className={styles.formInput} type="text" placeholder="Your Name" value={newCard.holder} onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>

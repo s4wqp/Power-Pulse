@@ -68,12 +68,13 @@ const TrainerSubscribersPage = () => {
               {filtered.map((sub) => {
                 const endDate = sub.endDate ? new Date(sub.endDate) : null;
                 const isActive = endDate ? endDate > new Date() : false;
+                const finalImageUrl = sub.traineeProfileImageUrl || sub.profileImageUrl || sub.imageUrl || sub.traineeImage || sub.trainee?.profileImageUrl || sub.trainee?.imageUrl;
                 return (
                   <tr key={sub.id || sub.traineeId}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 36, height: 36, borderRadius: 10, background: '#f0f0f0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {sub.traineeProfileImageUrl ? (
-                          <CachedImage imageUrl={sub.traineeProfileImageUrl} width="100%" height="100%" fit="cover" />
+                        {finalImageUrl ? (
+                          <CachedImage imageUrl={finalImageUrl} width="100%" height="100%" fit="cover" />
                         ) : (
                           <span className="material-icons" style={{ fontSize: 18, color: '#ccc' }}>person</span>
                         )}
@@ -89,7 +90,7 @@ const TrainerSubscribersPage = () => {
                       </span>
                     </td>
                     <td>
-                      <button className={styles.btnSecondary} style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => navigate(`/trainer/chat/${sub.traineeId}`, { state: { contact: { userId: sub.traineeId, name: sub.traineeName, profileImageUrl: sub.traineeProfileImageUrl } } })}>
+                      <button className={styles.btnSecondary} style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => navigate(`/trainer/chat/${sub.traineeId}`, { state: { contact: { userId: sub.traineeId, name: sub.traineeName, profileImageUrl: finalImageUrl } } })}>
                         <span className="material-icons" style={{ fontSize: 16 }}>chat</span>
                       </button>
                     </td>

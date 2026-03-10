@@ -15,16 +15,21 @@ export const productService = {
         return response.data;
     },
 
-    // POST /api/Products?adminId=X
+    // POST /api/Products
     createProduct: async (adminId, productData) => {
-        const response = await apiClient.post(`/api/Products?adminId=${adminId}`, productData);
+        const response = await apiClient.post(`/api/Products`, productData);
+        return response.data;
+    },
+
+    // PUT /api/Products/{id}
+    updateProduct: async (id, adminId, productData) => {
+        const response = await apiClient.put(`/api/Products/${id}`, productData);
         return response.data;
     },
 
     // DELETE /api/Products/{id}
     deleteProduct: async (id, adminId) => {
-        const url = adminId ? `/api/Products/${id}?adminId=${adminId}` : `/api/Products/${id}`;
-        await apiClient.delete(url);
+        await apiClient.delete(`/api/Products/${id}`);
     },
 
     // GET /api/referencedata/productcategories?storeType=X

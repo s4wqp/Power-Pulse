@@ -19,10 +19,22 @@ const GenericDetailsPage = () => {
     return null;
   }
 
-  // API returns number for price, fallback to 0 if undefined
-  const numericPrice = typeof item.price === 'number' ? item.price : parseFloat((item.price || '0').toString().replace(/[^0-9.]/g, '')) || 0;
+  // Extract sizes from attributes if available
+  const sizesFromApi = (item.attributes || [])
+    .filter(a => a.attrName?.toLowerCase() === 'size')
+    .map(a => a.attrValue);
 
-  // Real API returns imageUrls array, mock returned image string
+  // Decide if clothing based on sizes or generic matching
+  const isClothing = sizesFromApi.length > 0 ||
+    String(item.productCategoryName || item.category || '').toLowerCase().includes('shirt') ||
+    /shirt|hood|pant|short|apparel/i.test(item.name || '');
+
+  const availableSizes = sizesFromApi.length > 0 ? sizesFromApi : ['S', 'M', 'L', 'XL', 'XXL'];
+
+  const [selectedSize, setSelectedSize] = useState(availableSizes[0]);
+
+  // Restore necessary product variables
+  const numericPrice = typeof item.price === 'number' ? item.price : parseFloat((item.price || '0').toString().replace(/[^0-9.]/g, '')) || 0;
   const imageUrl = item.imageUrls?.[0] || item.image;
 
   const handleAddToCart = () => {
@@ -31,11 +43,25 @@ const GenericDetailsPage = () => {
       price: numericPrice,
       quantity: quantity,
       image: imageUrl,
-      id: item.id
+      id: item.id,
+      size: isClothing ? selectedSize : null
     });
     showToast('Item added to cart!');
     navigate('/trainee/cart');
   };
+
+  // Extract calories from attributes if available
+  const caloriesFromAttr = item.attributes?.find(a => /calorie/i.test(a.attrName))?.attrValue;
+  const displayCalories = caloriesFromAttr || item.calories;
+
+  // Determine color based on category/type
+  const categoryName = (item.productCategoryName || item.category || '').toLowerCase();
+  const isSupplement = categoryName.includes('supplement') || categoryName.includes('protein');
+  const isHealthyMeal = categoryName.includes('food') || categoryName.includes('meal') || categoryName.includes('healthy');
+
+  // Rule: food = green, supplement = red
+  const calorieColor = isSupplement ? '#ee3b3b' : (isHealthyMeal ? '#17A073' : '#ee3b3b');
+  const calorieBg = isSupplement ? 'rgba(238, 59, 59, 0.1)' : (isHealthyMeal ? 'rgba(23, 160, 115, 0.1)' : 'rgba(238, 59, 59, 0.1)');
 
   return (
     <WebLayout title={item.name} subtitle="Product Details" showBackButton>
@@ -58,10 +84,10 @@ const GenericDetailsPage = () => {
           <div className={styles.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
               <h1 className={styles.cardTitle} style={{ fontSize: 32 }}>{item.name}</h1>
-              {item.calories && (
-                <span style={{ backgroundColor: 'rgba(238, 59, 59, 0.1)', color: '#ee3b3b', padding: '6px 12px', borderRadius: 12, fontSize: 13, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 4 }}>
+              {displayCalories && (
+                <span style={{ backgroundColor: calorieBg, color: calorieColor, padding: '6px 12px', borderRadius: 12, fontSize: 13, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span className="material-icons" style={{ fontSize: 16 }}>local_fire_department</span>
-                  {item.calories} kcal
+                  {displayCalories} kcal
                 </span>
               )}
             </div>
@@ -74,6 +100,34 @@ const GenericDetailsPage = () => {
             <p style={{ color: '#666', lineHeight: 1.6, fontSize: 15, whiteSpace: 'pre-wrap', marginBottom: 24 }}>
               {item.description || "No description provided."}
             </p>
+
+            {/* Sizes Selection */}
+            {isClothing && (
+              <div style={{ marginBottom: 24 }}>
+                <span style={{ fontWeight: 600, color: '#333', display: 'block', marginBottom: 12 }}>Size</span>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {availableSizes.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: 12,
+                        border: `2px solid ${selectedSize === size ? 'var(--color-primary)' : '#efefef'}`,
+                        backgroundColor: selectedSize === size ? 'var(--color-primary)' : '#fff',
+                        color: selectedSize === size ? '#fff' : '#666',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        minWidth: 48,
+                      }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quantity Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>

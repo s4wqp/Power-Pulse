@@ -1,15 +1,18 @@
 {
+  "required": [
+    "name",
+    "storeType"
+  ],
   "type": "object",
   "properties": {
     "name": {
       "maxLength": 200,
-      "type": "string",
-      "nullable": true
+      "minLength": 1,
+      "type": "string"
     },
     "price": {
       "type": "number",
-      "format": "double",
-      "nullable": true
+      "format": "double"
     },
     "description": {
       "maxLength": 2000,
@@ -20,6 +23,10 @@
       "maxLength": 500,
       "type": "string",
       "nullable": true
+    },
+    "storeType": {
+      "minLength": 1,
+      "type": "string"
     },
     "subCategory": {
       "maxLength": 100,

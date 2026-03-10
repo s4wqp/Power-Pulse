@@ -4,4 +4,17 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://powerpuls.runasp.net',
+        changeOrigin: true,
+      },
+      '/chathub': {
+        target: 'http://powerpuls.runasp.net',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
 })

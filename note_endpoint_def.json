@@ -1,0 +1,42 @@
+{
+  "post": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        },
+        "text/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        },
+        "application/*+json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}

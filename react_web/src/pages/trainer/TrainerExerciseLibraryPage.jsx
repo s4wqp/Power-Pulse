@@ -6,12 +6,32 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 
+// Import muscle images
+import chestImg from '../../assets/images/chest.png';
+import backImg from '../../assets/images/back.png';
+import shoulderImg from '../../assets/images/shoulder.png';
+import armsImg from '../../assets/images/arms.png';
+import absImg from '../../assets/images/abs.png';
+import legsImg from '../../assets/images/legs.png';
+
+const MUSCLE_CATEGORIES = [
+  { name: 'Chest', iconUrl: chestImg },
+  { name: 'Back', iconUrl: backImg },
+  { name: 'Shoulders', iconUrl: shoulderImg },
+  { name: 'Arms', iconUrl: armsImg },
+  { name: 'Abs', iconUrl: absImg },
+  { name: 'Legs', iconUrl: legsImg },
+];
+
 const TrainerExerciseLibraryPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [categories, setCategories] = useState(MUSCLE_CATEGORIES);
+  const [selectedCat, setSelectedCat] = useState(MUSCLE_CATEGORIES[0].name);
 
 
   useEffect(() => {
@@ -42,31 +62,14 @@ const TrainerExerciseLibraryPage = () => {
     return w.targetMuscle || 'Other';
   };
 
-  const muscles = [
-    { name: 'Chest', image: '/assets/images/chest.png' },
-    { name: 'Back', image: '/assets/images/back.png' },
-    { name: 'Shoulders', image: '/assets/images/shoulder.png' },
-    { name: 'Arms', image: '/assets/images/arms.png' },
-    { name: 'Legs', image: '/assets/images/legs.png' },
-    { name: 'Abs', image: '/assets/images/abs.png' },
-  ];
-
-  // Group workouts by muscle
-  const groupedWorkouts = muscles.map(muscle => {
-    return {
-      ...muscle,
-      workouts: filtered.filter(w => parseTarget(w) === muscle.name)
-    };
-  }).filter(group => group.workouts.length > 0);
-
-  const otherWorkouts = filtered.filter(w => !muscles.some(m => m.name === parseTarget(w)));
-  if (otherWorkouts.length > 0) {
-    groupedWorkouts.push({
-      name: 'Other',
-      image: null,
-      workouts: otherWorkouts
-    });
-  }
+  const currentExercises = filtered.filter(w => {
+    const target = parseTarget(w);
+    // Include "Other" matching if selectedCat is "Other"
+    if (selectedCat === 'Other') {
+      return !muscles.some(m => m.name.toLowerCase() === target.toLowerCase());
+    }
+    return target.toLowerCase() === selectedCat.toLowerCase();
+  });
 
   const getDriveThumbnail = (url) => {
     if (!url) return null;
@@ -106,65 +109,97 @@ const TrainerExerciseLibraryPage = () => {
         </button>
       </div>
 
+      {/* Categories Horizontal List */}
+      <div style={{
+        display: 'flex',
+        overflowX: 'auto',
+        gap: 16,
+        paddingBottom: 24,
+        marginBottom: 24,
+        scrollbarWidth: 'none',
+        borderBottom: '1px solid #eee'
+      }}>
+        {categories.map((cat, idx) => {
+          const isSelected = selectedCat === cat.name;
+          return (
+            <div
+              key={idx}
+              onClick={() => setSelectedCat(cat.name)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer',
+                opacity: 1,
+                backgroundColor: isSelected ? 'var(--color-primary)' : '#fff',
+                padding: '16px 12px',
+                borderRadius: 16,
+                border: isSelected ? '2px solid var(--color-primary)' : '2px solid transparent',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                transition: 'all 0.2s',
+                minWidth: 100,
+                flexShrink: 0
+              }}
+            >
+              <div style={{
+                width: 60, height: 60,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 12,
+              }}>
+                {cat.iconUrl ? (
+                  <img
+                    src={cat.iconUrl}
+                    alt={cat.name}
+                    style={{
+                      width: '100%', height: '100%', objectFit: 'contain'
+                    }}
+                  />
+                ) : (
+                  <span className="material-icons" style={{ fontSize: 40, color: isSelected ? '#fff' : '#999' }}>fitness_center</span>
+                )}
+              </div>
+              <span style={{
+                fontSize: 14, fontWeight: 'bold',
+                color: isSelected ? '#fff' : '#777'
+              }}>
+                {cat.name}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
       {loading ? (
         <div className={styles.loadingSpinner}><div className={styles.spinner} /></div>
-      ) : filtered.length === 0 ? (
+      ) : currentExercises.length === 0 ? (
         <div className={styles.emptyState}>
           <span className="material-icons">fitness_center</span>
-          <p>No exercises found. Add your first workout!</p>
+          <p>No {selectedCat} exercises found.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {groupedWorkouts.map((group) => (
-            <div key={group.name}>
-              {/* Category Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '8px', borderBottom: '2px solid rgba(23,160,115,0.1)' }}>
-                {group.image ? (
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f5f6f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src={group.image} alt={group.name} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-                  </div>
+        <div className={styles.itemsGrid}>
+          {currentExercises.map((workout) => (
+            <div
+              key={workout.id}
+              className={styles.itemCard}
+              onClick={() => navigate('/trainer/exercises/details', { state: { workout } })}
+            >
+              <div className={styles.itemImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', position: 'relative', overflow: 'hidden' }}>
+                {workout.imageUrl ? (
+                  <CachedImage imageUrl={workout.imageUrl} width="100%" height="100%" fit="cover" />
+                ) : getDriveThumbnail(workout.videoUrl) ? (
+                  <CachedImage imageUrl={getDriveThumbnail(workout.videoUrl)} width="100%" height="100%" fit="cover" />
                 ) : (
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f5f6f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span className="material-icons" style={{ color: '#17A073' }}>fitness_center</span>
+                  <span className="material-icons" style={{ fontSize: 48, color: '#ddd' }}>{workout.videoUrl ? 'videocam' : 'fitness_center'}</span>
+                )}
+                {workout.videoUrl && (
+                  <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                    <span className="material-icons" style={{ color: 'white', fontSize: 40, backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '8px' }}>play_arrow</span>
                   </div>
                 )}
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#1a1a2e' }}>
-                  {group.name} <span style={{ color: '#8a92a6', fontSize: '14px', fontWeight: '500' }}>({group.workouts.length})</span>
-                </h3>
               </div>
-
-              {/* Category Grid */}
-              <div className={styles.itemsGrid}>
-                {group.workouts.map((workout) => (
-                  <div key={workout.id} className={styles.itemCard} onClick={() => navigate('/trainer/exercises/details', { state: { workout } })} style={{ cursor: 'pointer' }}>
-                    <div className={styles.itemImage} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', position: 'relative', overflow: 'hidden' }}>
-                      {workout.imageUrl ? (
-                        <>
-                          <CachedImage imageUrl={workout.imageUrl} width="100%" height="100%" fit="cover" />
-                          {workout.videoUrl && <span className="material-icons" style={{ position: 'absolute', color: 'white', fontSize: '32px', backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '4px' }}>play_arrow</span>}
-                        </>
-                      ) : getDriveThumbnail(workout.videoUrl) ? (
-                        <>
-                          <CachedImage imageUrl={getDriveThumbnail(workout.videoUrl)} width="100%" height="100%" fit="cover" />
-                          <span className="material-icons" style={{ position: 'absolute', color: 'white', fontSize: '32px', backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '4px' }}>play_arrow</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="material-icons" style={{ fontSize: 48, color: '#333' }}>{workout.videoUrl ? 'videocam' : 'fitness_center'}</span>
-                          {workout.videoUrl && <span className="material-icons" style={{ position: 'absolute', color: 'white', fontSize: '32px', backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.4)', borderRadius: '50%', padding: '4px' }}>play_arrow</span>}
-                        </>
-                      )}
-                    </div>
-                    <div className={styles.itemBody}>
-                      <div className={styles.itemName} style={{ fontSize: '15px', fontWeight: '600', color: '#1a1a2e' }}>{parseWorkoutName(workout)}</div>
-                      {workout.description && (
-                        <div style={{ fontSize: '13px', color: '#666', marginTop: '6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {workout.description}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+              <div className={styles.itemBody}>
+                <div className={styles.itemName}>{parseWorkoutName(workout)}</div>
+                <div style={{ fontSize: 12, color: '#999', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {workout.description || 'No description available'}
+                </div>
               </div>
             </div>
           ))}

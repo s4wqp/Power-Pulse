@@ -300,73 +300,119 @@ const CheckoutPage = () => {
 
           {/* Right Column: Sticky Order Summary */}
           <div style={{
-            flex: '1 1 350px',
-            minWidth: '300px',
+            flex: '1 1 380px',
+            minWidth: '320px',
             maxWidth: '100%'
           }}>
             <div style={{
               position: 'sticky',
-              top: '24px',
+              top: '40px',
               backgroundColor: '#fff',
-              padding: '28px',
-              borderRadius: '16px',
-              border: '1px solid #eaeaea',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+              padding: '32px',
+              borderRadius: '24px',
+              border: '1px solid rgba(0,0,0,0.03)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s ease'
             }}>
 
-              <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '700', color: '#111' }}>Order Summary</h3>
+              <h3 style={{
+                margin: '0 0 24px 0',
+                fontSize: '22px',
+                fontWeight: '800',
+                color: '#1a1a2e',
+                letterSpacing: '-0.5px'
+              }}>
+                Order Summary
+              </h3>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#667085', fontSize: '15px', fontWeight: '500' }}>
                   <span>Items ({items.length})</span>
-                  <span style={{ fontWeight: '600', color: '#111' }}>{totalAmount.toFixed(2)} EGP</span>
+                  <span style={{ fontWeight: '700', color: '#1a1a2e' }}>{totalAmount.toLocaleString()} EGP</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#667085', fontSize: '15px', fontWeight: '500' }}>
                   <span>Shipping & Handling</span>
-                  <span style={{ fontWeight: '600', color: '#111' }}>{deliveryFee.toFixed(2)} EGP</span>
+                  <span style={{ fontWeight: '700', color: '#1a1a2e' }}>{deliveryFee.toLocaleString()} EGP</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#667085', fontSize: '15px', fontWeight: '500' }}>
                   <span>Estimated Tax</span>
-                  <span style={{ fontWeight: '600', color: '#111' }}>{serviceFee.toFixed(2)} EGP</span>
+                  <span style={{ fontWeight: '700', color: '#1a1a2e' }}>{serviceFee.toLocaleString()} EGP</span>
                 </div>
 
-                <div style={{ height: '1px', backgroundColor: '#eaeaea', margin: '4px 0' }} />
+                <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, #f0f0f0 50%, transparent 100%)', margin: '8px 0' }} />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '22px', fontWeight: '800', color: '#111', marginTop: '4px' }}>
-                  <span>Order Total</span>
-                  <span>{grandTotal.toFixed(2)} <span style={{ fontSize: '14px', fontWeight: '600', color: '#666' }}>EGP</span></span>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginTop: '4px',
+                  padding: '8px 0'
+                }}>
+                  <span style={{ fontSize: '18px', fontWeight: '800', color: '#1a1a2e' }}>Order Total</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '28px', fontWeight: '900', color: 'var(--color-primary)', lineHeight: 1 }}>
+                      {grandTotal.toLocaleString()}
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#8a92a6' }}>EGP</span>
+                  </div>
                 </div>
 
-                <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', lineHeight: '1.4', margin: '8px 0' }}>
-                  By placing your order, you agree to our <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>privacy notice</a> and <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>conditions of use</a>.
+                <div style={{
+                  fontSize: '12px',
+                  color: '#98a2b3',
+                  textAlign: 'center',
+                  lineHeight: '1.6',
+                  margin: '12px 0',
+                  padding: '0 10px'
+                }}>
+                  By placing your order, you agree to our <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '700' }}>privacy notice</a> and <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '700' }}>conditions of use</a>.
                 </div>
 
                 <button
                   onClick={handleConfirmOrder}
                   disabled={!selectedAddress || items.length === 0}
-                  className={styles.btnPrimary}
                   style={{
                     marginTop: '8px',
                     width: '100%',
-                    padding: '16px',
+                    padding: '20px',
                     fontSize: '16px',
-                    fontWeight: '700',
-                    backgroundColor: 'var(--color-primary)',
+                    fontWeight: '800',
+                    backgroundColor: '#1a1a2e',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: '12px',
+                    borderRadius: '16px',
                     cursor: (!selectedAddress || items.length === 0) ? 'not-allowed' : 'pointer',
                     opacity: (!selectedAddress || items.length === 0) ? 0.6 : 1,
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 12px rgba(23, 160, 115, 0.2)'
+                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    boxShadow: '0 10px 25px rgba(26, 26, 46, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px'
                   }}
-                  onMouseOver={(e) => { if (selectedAddress && items.length > 0) e.target.style.transform = 'translateY(-1px)'; }}
-                  onMouseOut={(e) => { if (selectedAddress && items.length > 0) e.target.style.transform = 'translateY(0)'; }}
+                  onMouseOver={(e) => {
+                    if (selectedAddress && items.length > 0) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.backgroundColor = '#252545';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (selectedAddress && items.length > 0) {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.backgroundColor = '#1a1a2e';
+                    }
+                  }}
                 >
-                  Place your order
+                  <span className="material-icons" style={{ fontSize: '20px' }}>lock</span>
+                  PLACE ORDER
                 </button>
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
+                  <span className="material-icons" style={{ fontSize: '16px', color: '#17A073' }}>verified</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#8a92a6', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Secure Checkout</span>
+                </div>
               </div>
             </div>
           </div>

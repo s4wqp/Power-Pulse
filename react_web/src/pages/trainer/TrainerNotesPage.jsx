@@ -42,7 +42,8 @@ const TrainerNotesPage = () => {
                 return;
             }
 
-            const subId = traineeSubs[0].id;
+            const activeSub = traineeSubs.find(s => s.endDate && new Date(s.endDate) > new Date()) || traineeSubs[0];
+            const subId = activeSub.id;
             setSubscriptionId(subId);
 
             const subDetails = await trainerService.getSubscriptionDetails(subId);
@@ -61,9 +62,10 @@ const TrainerNotesPage = () => {
                 const traineeSubs = (subscriptions || [])
                     .filter(s => s.traineeId === parseInt(traineeId))
                     .sort((a, b) => b.id - a.id);
-                if (traineeSubs.length > 0) {
-                    setSubscriptionId(traineeSubs[0].id);
-                    const notesData = await trainerService.getDailyNotes(traineeSubs[0].id);
+                const activeSub = traineeSubs.find(s => s.endDate && new Date(s.endDate) > new Date()) || traineeSubs[0];
+                if (activeSub) {
+                    setSubscriptionId(activeSub.id);
+                    const notesData = await trainerService.getDailyNotes(activeSub.id);
                     setNotes((notesData || []).map(n => ({
                         id: (n.id || n.noteId || '').toString(),
                         title: n.title || n.noteTitle || 'Untitled',

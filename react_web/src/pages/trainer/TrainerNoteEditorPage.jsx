@@ -35,7 +35,14 @@ const TrainerNoteEditorPage = () => {
             const traineeSubs = (subs || [])
                 .filter(s => s.traineeId === parseInt(traineeId))
                 .sort((a, b) => b.id - a.id);
-            if (traineeSubs.length > 0) {
+
+            // Try to find an active subscription first
+            const activeSub = traineeSubs.find(s => s.endDate && new Date(s.endDate) > new Date());
+
+            if (activeSub) {
+                setSubscriptionId(activeSub.id);
+            } else if (traineeSubs.length > 0) {
+                // Fallback to the latest one, but setting it might result in 403 on save
                 setSubscriptionId(traineeSubs[0].id);
             }
         } catch (err) {

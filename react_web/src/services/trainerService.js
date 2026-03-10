@@ -56,15 +56,33 @@ export const trainerService = {
     },
 
     updateProfileImage: async (trainerId, imageUrl) => {
-        const response = await apiClient.put(`/api/trainers/${trainerId}`, { profileImageUrl: imageUrl });
+        const profile = await apiClient.get(`/api/trainers/${trainerId}`);
+        const currentData = profile.data || {};
+
+        let specString = currentData.specialization;
+        if (Array.isArray(currentData.specializations)) {
+            specString = currentData.specializations.map(s => typeof s === 'string' ? s : s.name).join(', ');
+        }
+
+        const payload = {
+            name: currentData.name,
+            phone: currentData.phone,
+            professionalTitle: currentData.professionalTitle,
+            experienceYears: currentData.experienceYears,
+            bio: currentData.bio || '',
+            specializationIds: currentData.specializationIds || [],
+            profileImageUrl: imageUrl
+        };
+        const response = await apiClient.put(`/api/trainers/${trainerId}`, payload);
         return response.data;
     },
 
     addDailyNote: async (subscriptionId, title, noteText) => {
-        const data = { noteText };
+        let finalNoteText = noteText;
         if (title && title.trim() !== '') {
-            data.title = title;
+            finalNoteText = `**${title}**\n${noteText}`;
         }
+        const data = { noteText: finalNoteText };
         const response = await apiClient.post(`/api/subscriptions/${subscriptionId}/notes`, data);
         return response.data;
     },

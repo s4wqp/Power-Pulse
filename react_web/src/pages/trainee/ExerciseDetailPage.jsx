@@ -42,6 +42,30 @@ const ExerciseDetailPage = () => {
     return null;
   }
 
+  const getEmbedUrl = (url) => {
+    if (!url) return null;
+
+    // Handle YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const videoIdMatch = url.match(/(?:youtu\.be\/|v=|\/v\/|\/embed\/)([^&?\/\s]+)/);
+      if (videoIdMatch && videoIdMatch[1]) {
+        return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+      }
+    }
+
+    // Handle Google Drive
+    const match = url.match(/[?&]id=([^&]+)/);
+    if (match && match[1]) {
+      return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+    const match2 = url.match(/\/file\/d\/([^\/]+)/);
+    if (match2 && match2[1]) {
+      return `https://drive.google.com/file/d/${match2[1]}/preview`;
+    }
+
+    return url;
+  };
+
   return (
     <WebLayout title={exercise.title || exercise.name || 'Exercise Details'} subtitle="Review exercise instructions and form">
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -49,21 +73,17 @@ const ExerciseDetailPage = () => {
         {/* Left Column: Media */}
         <div className={styles.card} style={{ flex: '1 1 400px', padding: 0, overflow: 'hidden' }}>
           <div style={{ height: 400, width: '100%', backgroundColor: '#f0f0f0', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {exercise.imageUrl ? (
+            {exercise.imageUrl && (!exercise.videoUrl || !hasActiveSubscription) ? (
               <CachedImage imageUrl={exercise.imageUrl} width="100%" height="100%" fit="cover" />
+            ) : exercise.videoUrl && hasActiveSubscription ? (
+              <iframe
+                src={getEmbedUrl(exercise.videoUrl)}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                allow="autoplay; fullscreen"
+                title={exercise.title || exercise.name}
+              ></iframe>
             ) : (
               <span className="material-icons" style={{ fontSize: 80, color: '#ccc' }}>fitness_center</span>
-            )}
-
-            {exercise.videoUrl && hasActiveSubscription && (
-              <a
-                href={exercise.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ position: 'absolute', width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', textDecoration: 'none' }}
-              >
-                <span className="material-icons" style={{ color: 'white', fontSize: 36 }}>play_arrow</span>
-              </a>
             )}
 
             {exercise.videoUrl && !hasActiveSubscription && (

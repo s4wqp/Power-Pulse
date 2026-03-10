@@ -78,7 +78,14 @@ const ShoppingCartPage = () => {
                           <span className="material-icons" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' }}>image</span>
                         )}
                       </div>
-                      <span style={{ fontWeight: 600 }}>{item.name || item.title}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 600 }}>{item.name || item.title}</span>
+                        {item.size && (
+                          <span style={{ marginTop: 4, padding: '2px 8px', backgroundColor: '#eee', borderRadius: 4, fontSize: 12, color: '#666', fontWeight: 600, width: 'fit-content' }}>
+                            Size: {item.size}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>{item.price} EGP</td>
                     <td>
