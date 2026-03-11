@@ -62,9 +62,26 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
     if (userId == null) return;
 
+    final nameTrimmed = _nameController.text.trim();
+    final phoneTrimmed = _phoneController.text.trim();
+
+    if (nameTrimmed.isEmpty || phoneTrimmed.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    if (phoneTrimmed.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Phone number must be exactly 10 digits')),
+      );
+      return;
+    }
+
     final data = {
-      'name': _nameController.text,
-      'phone': _phoneController.text,
+      'name': nameTrimmed,
+      'phone': phoneTrimmed,
       // 'email': _emailController.text, // Usually email is not editable or requires verification
     };
 

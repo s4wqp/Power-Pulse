@@ -36,9 +36,22 @@ const PersonalDetailsPage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+
+    if (!formData.name?.trim() || !formData.phone?.trim()) {
+      showToast('Please fill all required fields.', true);
+      return;
+    }
+
+    const phoneTrimmed = formData.phone.trim();
+    if (phoneTrimmed.length !== 10) {
+      showToast('Phone number must be exactly 10 digits long.', true);
+      return;
+    }
+
     if (user?.id) {
       const payload = {
-        ...formData,
+        name: formData.name.trim(),
+        phone: phoneTrimmed,
       };
       const success = await updateProfile(user.id, payload);
       if (success) {
