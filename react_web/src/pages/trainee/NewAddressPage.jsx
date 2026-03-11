@@ -363,12 +363,28 @@ const NewAddressPage = () => {
               />
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
+            <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => navigate(-1)}
                 className={styles.btnSecondary}
-                style={{ width: '120px', padding: '12px 0' }}
+                style={{
+                  minWidth: '130px',
+                  padding: '14px 24px',
+                  borderRadius: '12px',
+                  backgroundColor: '#ffffff',
+                  border: '1.5px solid #e2e8f0',
+                  color: '#64748b',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#334155'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}
               >
                 Cancel
               </button>
@@ -376,11 +392,29 @@ const NewAddressPage = () => {
                 type="submit"
                 disabled={isLoading}
                 className={styles.btnPrimary}
-                style={{ width: '180px', padding: '12px 0', opacity: isLoading ? 0.7 : 1 }}
+                style={{
+                  minWidth: '180px',
+                  padding: '14px 24px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--color-primary, #17A073)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.7 : 1,
+                  boxShadow: '0 4px 12px rgba(23, 160, 115, 0.25)',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+                onMouseOver={(e) => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(23, 160, 115, 0.35)'; } }}
+                onMouseOut={(e) => { if (!isLoading) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(23, 160, 115, 0.25)'; } }}
               >
                 {isLoading ? (
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <span className="material-icons" style={{ animation: 'spin 1s linear infinite' }}>refresh</span>
+                    <span className="material-icons" style={{ animation: 'spin 1s linear infinite', fontSize: '18px' }}>refresh</span>
                     Saving...
                   </span>
                 ) : 'Save Address'}
