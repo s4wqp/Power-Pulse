@@ -28,7 +28,7 @@ const CoachProfilePage = () => {
         trainerService.getPlans(id),
       ]);
       setTrainer(trainerData);
-      setPlans(plansData || []);
+      setPlans((plansData || []).filter(p => p.isActive !== false));
     } catch (err) {
       console.error('Error loading trainer:', err);
     } finally {
