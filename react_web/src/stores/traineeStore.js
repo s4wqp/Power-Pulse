@@ -27,6 +27,27 @@ const useTraineeStore = create((set) => ({
         }
     },
 
+    updateProfile: async (id, updatedFields) => {
+        set({ isLoading: true, error: null });
+        try {
+            const currentProfile = await traineeService.getProfile(id) || {};
+            const payload = {
+                name: currentProfile.name,
+                phone: currentProfile.phone,
+                weight: currentProfile.weight,
+                height: currentProfile.height,
+                profileImageUrl: currentProfile.profileImageUrl,
+                ...updatedFields
+            };
+            const data = await traineeService.updateProfile(id, payload);
+            set({ trainee: data, isLoading: false });
+            return true;
+        } catch (error) {
+            set({ error: error.message, isLoading: false });
+            return false;
+        }
+    },
+
     fetchAddresses: async (traineeId) => {
         set({ isLoading: true, error: null });
         try {
