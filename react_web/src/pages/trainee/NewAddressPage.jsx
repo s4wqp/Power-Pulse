@@ -363,12 +363,12 @@ const NewAddressPage = () => {
               />
             </div>
 
-            <div style={{ marginTop: '16px', display: 'flex', gap: '16px' }}>
+            <div style={{ marginTop: '24px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => navigate(-1)}
                 className={styles.btnSecondary}
-                style={{ flex: 1 }}
+                style={{ width: '120px', padding: '12px 0' }}
               >
                 Cancel
               </button>
@@ -376,12 +376,12 @@ const NewAddressPage = () => {
                 type="submit"
                 disabled={isLoading}
                 className={styles.btnPrimary}
-                style={{ flex: 2, opacity: isLoading ? 0.7 : 1 }}
+                style={{ width: '180px', padding: '12px 0', opacity: isLoading ? 0.7 : 1 }}
               >
                 {isLoading ? (
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <span className="material-icons" style={{ animation: 'spin 1s linear infinite' }}>refresh</span>
-                    Saving Address...
+                    Saving...
                   </span>
                 ) : 'Save Address'}
               </button>
