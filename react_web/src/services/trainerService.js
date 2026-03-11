@@ -70,6 +70,7 @@ export const trainerService = {
             professionalTitle: currentData.professionalTitle,
             experienceYears: currentData.experienceYears,
             bio: currentData.bio || '',
+            specialization: specString || '',
             specializationIds: currentData.specializationIds || [],
             profileImageUrl: imageUrl
         };

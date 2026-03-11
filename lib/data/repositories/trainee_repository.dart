@@ -26,9 +26,16 @@ class TraineeRepository {
 
   Future<void> updateProfileImage(int id, String imageUrl) async {
     try {
+      final current = await getProfile(id);
       await _apiClient.dio.put(
         '/api/trainees/$id',
-        data: {'profileImageUrl': imageUrl},
+        data: {
+          'name': current.name,
+          'phone': current.phone,
+          'weight': current.weight,
+          'height': current.height,
+          'profileImageUrl': imageUrl,
+        },
       );
     } catch (e) {
       rethrow;

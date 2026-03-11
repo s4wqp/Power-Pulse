@@ -206,8 +206,22 @@ class TrainerRepository {
 
   Future<void> updateProfileImage(int trainerId, String imageUrl) async {
     try {
+      final current = await getTrainerDetails(trainerId);
       final url = '/api/trainers/$trainerId';
-      await _apiClient.dio.put(url, data: {'profileImageUrl': imageUrl});
+      await _apiClient.dio.put(
+        url,
+        data: {
+          'name': current.name,
+          'phone': current.phone,
+          'professionalTitle': current.professionalTitle,
+          'experienceYears': current.experienceYears,
+          'bio': current.bio,
+          'specialization': current.specializations
+              .map((e) => e.name)
+              .join(', '),
+          'profileImageUrl': imageUrl,
+        },
+      );
     } catch (e) {
       rethrow;
     }
