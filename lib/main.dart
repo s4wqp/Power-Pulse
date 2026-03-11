@@ -9,6 +9,7 @@ import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/business_logic/providers/chat_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainee_provider.dart';
+import 'package:power_pulse/presentation/widgets/offline_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,9 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             initialRoute: Routing.splashScreen,
             onGenerateRoute: Routing.generateRoute,
+            builder: (context, child) {
+              return OfflineBanner(child: child ?? const SizedBox.shrink());
+            },
           ),
         );
       },

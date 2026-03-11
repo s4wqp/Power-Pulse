@@ -59,10 +59,18 @@ class _TrainerChatDetailScreenState extends State<TrainerChatDetailScreen> {
     });
   }
 
+  late ChatProvider _chatProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _chatProvider = context.read<ChatProvider>();
+  }
+
   @override
   void dispose() {
     // Stop polling when leaving the chat screen
-    context.read<ChatProvider>().stopPolling();
+    _chatProvider.stopPolling();
     _controller.dispose();
     _scrollController.dispose();
     _audioRecorder.dispose();
@@ -104,9 +112,11 @@ class _TrainerChatDetailScreenState extends State<TrainerChatDetailScreen> {
     } catch (e) {
       debugPrint('Error picking document: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error picking document: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to attach document. Please try again.'),
+          ),
+        );
       }
     }
   }

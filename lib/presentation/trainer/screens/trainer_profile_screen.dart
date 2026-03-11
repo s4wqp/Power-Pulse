@@ -21,61 +21,73 @@ class TrainerProfileScreen extends StatefulWidget {
 class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
   final int _currentIndex = 3; // Profile is now the 4th item (index 3)
   bool _isUploading = false;
+  bool _isPickerActive = false;
 
   Future<void> _pickAndUploadImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 50,
-      maxWidth: 1024,
-    );
+    if (_isPickerActive || _isUploading) return;
+    _isPickerActive = true;
 
-    if (pickedFile != null) {
-      setState(() {
-        _isUploading = true;
-      });
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50,
+        maxWidth: 1024,
+      );
 
-      try {
-        final driveService = DriveService();
-        debugPrint('Starting Image Upload...');
-        final url = await driveService.uploadFile(file: File(pickedFile.path));
-        debugPrint('Uploaded Image URL: $url');
+      if (pickedFile != null) {
+        setState(() {
+          _isUploading = true;
+        });
 
-        if (url != null && mounted) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
+        try {
+          final driveService = DriveService();
+          debugPrint('Starting Image Upload...');
+          final url = await driveService.uploadFile(
+            file: File(pickedFile.path),
           );
-          final trainerProvider = Provider.of<TrainerProvider>(
-            context,
-            listen: false,
-          );
+          debugPrint('Uploaded Image URL: $url');
 
-          if (authProvider.userId != null) {
-            debugPrint('Updating Trainer Profile Image with URL: $url');
-
-            final success = await trainerProvider.updateProfileImage(
-              authProvider.userId!,
-              url,
+          if (url != null && mounted) {
+            final authProvider = Provider.of<AuthProvider>(
+              context,
+              listen: false,
             );
-            debugPrint('Profile Image Update Result: $success');
+            final trainerProvider = Provider.of<TrainerProvider>(
+              context,
+              listen: false,
+            );
+
+            if (authProvider.userId != null) {
+              debugPrint('Updating Trainer Profile Image with URL: $url');
+
+              final success = await trainerProvider.updateProfileImage(
+                authProvider.userId!,
+                url,
+              );
+              debugPrint('Profile Image Update Result: $success');
+            }
+          }
+        } catch (e) {
+          debugPrint('Upload Error: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error uploading image: $e')),
+            );
+          }
+        } finally {
+          debugPrint('Upload Complete');
+          if (mounted) {
+            setState(() {
+              _isUploading = false;
+            });
           }
         }
-      } catch (e) {
-        debugPrint('Upload Error: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error uploading image: $e')));
-        }
-      } finally {
-        debugPrint('Upload Complete');
-        if (mounted) {
-          setState(() {
-            _isUploading = false;
-          });
-        }
       }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    } finally {
+      _isPickerActive = false;
     }
   }
 

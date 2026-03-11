@@ -7,6 +7,7 @@ import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:power_pulse/presentation/widgets/card_input_formatters.dart';
 import 'package:flutter/services.dart';
+import 'package:power_pulse/utils/error_handler.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
   const PaymentDetailsScreen({super.key});
@@ -227,20 +228,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                             }
                           } on DioException catch (e) {
                             if (!mounted) return;
-                            String errorMsg =
-                                "Failed to add card: ${e.response?.statusCode ?? 'Unknown Error'}";
-                            if (e.response != null &&
-                                e.response!.data != null) {
-                              try {
-                                if (e.response!.data is Map &&
-                                    e.response!.data['message'] != null) {
-                                  errorMsg = e.response!.data['message'];
-                                } else if (e.response!.data is String &&
-                                    e.response!.data.toString().isNotEmpty) {
-                                  errorMsg = e.response!.data;
-                                }
-                              } catch (_) {}
-                            }
+                            final errorMsg =
+                                ErrorHandler.getUserFriendlyMessage(e);
                             ScaffoldMessenger.of(
                               context,
                             ).showSnackBar(SnackBar(content: Text(errorMsg)));

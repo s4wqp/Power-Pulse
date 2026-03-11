@@ -3,6 +3,7 @@ import 'package:power_pulse/data/models/trainee_models.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
 import 'package:power_pulse/data/models/order_models.dart';
 import 'package:power_pulse/data/repositories/trainee_repository.dart';
+import 'package:power_pulse/utils/error_handler.dart';
 
 class TraineeProvider with ChangeNotifier {
   final TraineeRepository _traineeRepository = TraineeRepository();
@@ -34,7 +35,7 @@ class TraineeProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -51,7 +52,7 @@ class TraineeProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -69,7 +70,7 @@ class TraineeProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -86,7 +87,7 @@ class TraineeProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -110,7 +111,7 @@ class TraineeProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -132,7 +133,7 @@ class TraineeProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -151,7 +152,7 @@ class TraineeProvider with ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -172,7 +173,7 @@ class TraineeProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -195,7 +196,7 @@ class TraineeProvider with ChangeNotifier {
       return order;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return null;
     }
@@ -223,7 +224,7 @@ class TraineeProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -240,7 +241,7 @@ class TraineeProvider with ChangeNotifier {
       return order;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return null;
     }

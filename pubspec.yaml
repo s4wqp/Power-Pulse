@@ -66,6 +66,7 @@ dependencies:
   signalr_netcore: ^1.4.4
   video_compress: ^3.1.4
   cached_network_image: ^3.3.1
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,7 @@ import 'package:power_pulse/data/repositories/trainer_repository.dart';
 import 'package:power_pulse/data/repositories/trainee_repository.dart';
 import 'package:power_pulse/services/drive_service.dart';
 import 'package:power_pulse/models/trainer_registration_data.dart';
+import 'package:power_pulse/utils/error_handler.dart';
 import 'dart:io';
 
 class TrainerProvider extends ChangeNotifier {
@@ -123,7 +124,7 @@ class TrainerProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -139,7 +140,7 @@ class TrainerProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -157,7 +158,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -215,7 +216,7 @@ class TrainerProvider extends ChangeNotifier {
       return response != null;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -285,7 +286,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -304,7 +305,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -322,7 +323,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -340,7 +341,7 @@ class TrainerProvider extends ChangeNotifier {
       return trainer;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return null;
     }
@@ -363,7 +364,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -400,7 +401,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -599,13 +600,13 @@ class TrainerProvider extends ChangeNotifier {
       debugPrint('Profile Update Error Response: ${e.response?.data}');
       debugPrint('Profile Update Error: $e');
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     } catch (e) {
       debugPrint('Profile Update Error: $e');
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }
@@ -624,7 +625,7 @@ class TrainerProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }

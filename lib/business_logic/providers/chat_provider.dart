@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
 import 'package:power_pulse/data/repositories/chat_repository.dart';
+import 'package:power_pulse/utils/error_handler.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 class ChatProvider extends ChangeNotifier {
@@ -219,7 +220,7 @@ class ChatProvider extends ChangeNotifier {
     } catch (e) {
       if (showLoading) {
         _isLoading = false;
-        _errorMessage = e.toString();
+        _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       }
       notifyListeners();
     }
@@ -278,7 +279,7 @@ class ChatProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
     }
   }
@@ -296,25 +297,12 @@ class ChatProvider extends ChangeNotifier {
     } on DioException catch (e) {
       final errorData = e.response?.data;
       debugPrint("Chat Send Error (${e.response?.statusCode}): $errorData");
-
-      if (e.response?.statusCode == 400) {
-        if (errorData is Map) {
-          _errorMessage =
-              errorData['message'] ??
-              errorData['error'] ??
-              "Bad Request: ${errorData.toString()}";
-        } else {
-          _errorMessage =
-              "Bad Request: ${errorData?.toString() ?? 'No detail'}";
-        }
-      } else {
-        _errorMessage = e.message ?? "Connection error";
-      }
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     } catch (e) {
       debugPrint("Chat Send Unexpected Error: $e");
-      _errorMessage = e.toString();
+      _errorMessage = ErrorHandler.getUserFriendlyMessage(e);
       notifyListeners();
       return false;
     }

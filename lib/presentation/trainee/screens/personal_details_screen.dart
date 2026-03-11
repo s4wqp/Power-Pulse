@@ -104,6 +104,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         centerTitle: false,
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         margin: EdgeInsets.only(top: 20.h),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -117,86 +119,93 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
             if (traineeProvider.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return Padding(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20.h),
-                  _buildLabel('Name'),
-                  _buildTextField(_nameController),
-                  SizedBox(height: 15.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            return CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: EdgeInsets.all(20.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20.h),
+                        _buildLabel('Name'),
+                        _buildTextField(_nameController),
+                        SizedBox(height: 15.h),
+                        Row(
                           children: [
-                            _buildLabel('Country'),
-                            // Country code handling might need a separate widget/logic
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 12.h,
-                                horizontal: 15.w,
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('Country'),
+                                  // Country code handling might need a separate widget/logic
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 12.h,
+                                      horizontal: 15.w,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(5.r),
+                                    ),
+                                    child: Text(
+                                      '+20',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(5.r),
-                              ),
-                              child: Text(
-                                '+20',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            ),
+                            SizedBox(width: 15.w),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('Mobile Number'),
+                                  _buildTextField(_phoneController),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      SizedBox(width: 15.w),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Mobile Number'),
-                            _buildTextField(_phoneController),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15.h),
-                  _buildLabel('Email Addresses'),
-                  _buildTextField(_emailController, readOnly: true),
-                  Spacer(),
-                  Center(
-                    child: SizedBox(
-                      width: 150.w,
-                      child: ElevatedButton(
-                        onPressed: _saveProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Custom().colors().lightGreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                        ),
-                        child: Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.white,
+                        SizedBox(height: 15.h),
+                        _buildLabel('Email Addresses'),
+                        _buildTextField(_emailController, readOnly: true),
+                        const Spacer(),
+                        Center(
+                          child: SizedBox(
+                            width: 150.w,
+                            child: ElevatedButton(
+                              onPressed: _saveProfile,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Custom().colors().lightGreen,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.r),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                              ),
+                              child: Text(
+                                'Save',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        SizedBox(height: 30.h),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 30.h),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
