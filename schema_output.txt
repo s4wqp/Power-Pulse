@@ -1,0 +1,18 @@
+--- All Relevant Paths ---
+/api/Auth/signup/trainer
+/api/Subscriptions
+/api/Subscriptions/trainee/{traineeId}
+/api/Subscriptions/trainer/{trainerId}
+--- Path: /api/Subscriptions/trainer/{trainerId} ---
+{}
+
+
+/api/Subscriptions/{id}
+/api/Subscriptions/{id}/notes
+/api/Subscriptions/{id}/summary
+/api/Trainers
+/api/Trainers/{id}
+/api/Trainers/{id}/bankcards
+/api/Trainers/{id}/certificates
+/api/Trainers/{id}/plans
+/api/Trainers/{id}/workouts

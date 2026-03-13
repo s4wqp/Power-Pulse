@@ -1,0 +1,242 @@
+MATCH: /api/Subscriptions
+{
+  "post": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateSubscriptionRequest"
+          }
+        },
+        "text/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateSubscriptionRequest"
+          }
+        },
+        "application/*+json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateSubscriptionRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Subscriptions/{id}
+{
+  "get": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Subscriptions/trainee/{traineeId}
+{
+  "get": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "traineeId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Subscriptions/trainer/{trainerId}
+{
+  "get": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "trainerId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Subscriptions/{id}/notes
+{
+  "post": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        },
+        "text/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        },
+        "application/*+json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateDailyNoteRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Subscriptions/{id}/summary
+{
+  "get": {
+    "tags": [
+      "Subscriptions"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================
+MATCH: /api/Trainers/{id}/plans
+{
+  "get": {
+    "tags": [
+      "Trainers"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  },
+  "post": {
+    "tags": [
+      "Trainers"
+    ],
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateTrainingPlanRequest"
+          }
+        },
+        "text/json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateTrainingPlanRequest"
+          }
+        },
+        "application/*+json": {
+          "schema": {
+            "$ref": "#/components/schemas/CreateTrainingPlanRequest"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK"
+      }
+    }
+  }
+}
+========================================

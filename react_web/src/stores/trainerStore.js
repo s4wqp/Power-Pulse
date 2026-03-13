@@ -1,6 +1,47 @@
 import { create } from 'zustand';
 import { trainerService } from '../services/trainerService';
 
+const toNumber = (v) => {
+    if (v == null) return 0;
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+};
+
+const extractPlanId = (sub) =>
+    sub?.trainingPlanId ??
+    sub?.TrainingPlanId ??
+    sub?.trainingPlanID ??
+    sub?.TrainingPlanID ??
+    sub?.training_plan_id ??
+    sub?.planId ??
+    sub?.PlanId ??
+    sub?.planID ??
+    sub?.PlanID ??
+    sub?.plan_id ??
+    sub?.trainingPlan?.id ??
+    sub?.trainingPlan?.Id ??
+    sub?.plan?.id ??
+    sub?.plan?.Id ??
+    null;
+
+const extractPlanPrice = (sub, plansById) => {
+    const direct =
+        sub?.priceSnapshot ??
+        sub?.PriceSnapshot ??
+        sub?.planPrice ??
+        sub?.PlanPrice ??
+        sub?.plan_price ??
+        sub?.price ??
+        sub?.Price ??
+        sub?.plan?.price ??
+        sub?.trainingPlan?.price;
+    if (direct != null) return toNumber(direct);
+    const planId = extractPlanId(sub);
+    if (planId == null) return 0;
+    return toNumber(plansById?.get?.(String(planId))?.price);
+};
+
 const useTrainerStore = create((set, get) => ({
     trainers: [],
     currentTrainer: null,
@@ -45,17 +86,27 @@ const useTrainerStore = create((set, get) => ({
     fetchTrainerStats: async (trainerId) => {
         try {
             let stats = await trainerService.getTrainerStats(trainerId);
-            if (!stats.totalAmount || stats.totalAmount === 0) {
-                // Fallback: compute from subscriptions
-                const subs = await trainerService.getTrainerSubscriptions(trainerId);
-                let totalAmount = 0.0;
-                subs.forEach(sub => {
-                    totalAmount += Number(sub.planPrice || sub.price || 0);
-                });
+            const totalAmount = toNumber(stats?.totalAmount ?? stats?.TotalAmount);
+            if (totalAmount === 0) {
+                // Fallback: compute from subscriptions (and plans if needed)
+                const [subs, plans] = await Promise.all([
+                    trainerService.getTrainerSubscriptions(trainerId),
+                    trainerService.getPlans(trainerId),
+                ]);
+                const plansById = new Map(
+                    (plans || [])
+                        .filter(p => p && (p.id != null || p.trainingPlanId != null || p.ID != null || p.Id != null))
+                        .map(p => [String(p.id ?? p.trainingPlanId ?? p.ID ?? p.Id), p])
+                );
+                const computedTotalAmount = (subs || []).reduce(
+                    (sum, sub) => sum + extractPlanPrice(sub, plansById),
+                    0
+                );
                 stats = {
-                    totalClients: subs.length,
-                    todayAmount: 0.0,
-                    totalAmount
+                    ...stats,
+                    totalClients: toNumber(stats?.totalClients ?? stats?.TotalClients) || (subs || []).length,
+                    todayAmount: toNumber(stats?.todayAmount ?? stats?.TodayAmount) || 0.0,
+                    totalAmount: computedTotalAmount
                 };
             }
             set({ stats });

@@ -349,9 +349,11 @@ class TrainerStats {
 
   factory TrainerStats.fromJson(Map<String, dynamic> json) {
     return TrainerStats(
-      totalClients: json['totalClients'] is int ? json['totalClients'] : 0,
-      todayAmount: _toDouble(json['todayAmount']),
-      totalAmount: _toDouble(json['totalAmount']),
+      totalClients: (json['totalClients'] ?? json['TotalClients']) is int
+          ? (json['totalClients'] ?? json['TotalClients'])
+          : 0,
+      todayAmount: _toDouble(json['todayAmount'] ?? json['TodayAmount']),
+      totalAmount: _toDouble(json['totalAmount'] ?? json['TotalAmount']),
     );
   }
 

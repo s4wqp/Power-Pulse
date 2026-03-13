@@ -6,10 +6,45 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 
+const extractPlanId = (sub) =>
+  sub?.trainingPlanId ??
+  sub?.TrainingPlanId ??
+  sub?.trainingPlanID ??
+  sub?.TrainingPlanID ??
+  sub?.training_plan_id ??
+  sub?.planId ??
+  sub?.PlanId ??
+  sub?.planID ??
+  sub?.PlanID ??
+  sub?.plan_id ??
+  sub?.trainingPlan?.id ??
+  sub?.trainingPlan?.Id ??
+  sub?.plan?.id ??
+  sub?.plan?.Id ??
+  null;
+
+const extractPlanName = (sub, plansById) => {
+  const direct =
+    sub?.planNameSnapshot ||
+    sub?.PlanNameSnapshot ||
+    sub?.planName ||
+    sub?.PlanName ||
+    sub?.trainingPlanName ||
+    sub?.TrainingPlanName ||
+    sub?.plan?.name ||
+    sub?.trainingPlan?.name;
+  if (direct) return direct;
+
+  const planId = extractPlanId(sub);
+  if (planId == null) return null;
+  return plansById?.get?.(String(planId))?.name || null;
+};
+
 const TrainerSubscribersPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [subscribers, setSubscribers] = useState([]);
+  const [plansById, setPlansById] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,8 +54,17 @@ const TrainerSubscribersPage = () => {
 
   const loadSubscribers = async () => {
     try {
-      const data = await trainerService.getTrainerSubscriptions(user.id);
+      const [data, plans] = await Promise.all([
+        trainerService.getTrainerSubscriptions(user.id),
+        trainerService.getPlans(user.id),
+      ]);
       setSubscribers(data || []);
+      const map = new Map(
+        (plans || [])
+          .filter(p => p && (p.id != null || p.trainingPlanId != null || p.ID != null || p.Id != null))
+          .map(p => [String(p.id ?? p.trainingPlanId ?? p.ID ?? p.Id), p])
+      );
+      setPlansById(map);
     } catch {
       setSubscribers([]);
     } finally {
@@ -66,9 +110,10 @@ const TrainerSubscribersPage = () => {
             </thead>
             <tbody>
               {filtered.map((sub) => {
-                const endDate = sub.endDate ? new Date(sub.endDate) : null;
+                const endDate = (sub.endDate || sub.EndDate) ? new Date(sub.endDate || sub.EndDate) : null;
                 const isActive = endDate ? endDate > new Date() : false;
-                const finalImageUrl = sub.traineeProfileImageUrl || sub.profileImageUrl || sub.imageUrl || sub.traineeImage || sub.trainee?.profileImageUrl || sub.trainee?.imageUrl;
+                const finalImageUrl = sub.traineeProfileImageUrl || sub.TraineeProfileImageUrl || sub.profileImageUrl || sub.ProfileImageUrl || sub.imageUrl || sub.imageUrl || sub.traineeImage || sub.trainee?.profileImageUrl || sub.trainee?.imageUrl;
+                const planName = extractPlanName(sub, plansById);
                 return (
                   <tr key={sub.id || sub.traineeId}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -79,10 +124,10 @@ const TrainerSubscribersPage = () => {
                           <span className="material-icons" style={{ fontSize: 18, color: '#ccc' }}>person</span>
                         )}
                       </div>
-                      {sub.traineeName || 'Unknown'}
+                      {sub.traineeName || sub.TraineeName || 'Unknown'}
                     </td>
-                    <td>{sub.planName || sub.trainingPlanName || 'N/A'}</td>
-                    <td>{sub.startDate ? new Date(sub.startDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>{planName || 'N/A'}</td>
+                    <td>{(sub.startDate || sub.StartDate) ? new Date(sub.startDate || sub.StartDate).toLocaleDateString() : 'N/A'}</td>
                     <td>{endDate ? endDate.toLocaleDateString() : 'N/A'}</td>
                     <td>
                       <span className={`${styles.badge} ${isActive ? styles.badgeGreen : styles.badgeRed}`}>

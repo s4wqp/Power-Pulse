@@ -6,6 +6,65 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 
+const toNumber = (v) => {
+  if (v == null) return 0;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const extractPlanId = (sub) =>
+  sub?.trainingPlanId ??
+  sub?.TrainingPlanId ??
+  sub?.trainingPlanID ??
+  sub?.TrainingPlanID ??
+  sub?.training_plan_id ??
+  sub?.planId ??
+  sub?.PlanId ??
+  sub?.planID ??
+  sub?.PlanID ??
+  sub?.plan_id ??
+  sub?.trainingPlan?.id ??
+  sub?.trainingPlan?.Id ??
+  sub?.plan?.id ??
+  sub?.plan?.Id ??
+  null;
+
+const extractPlanName = (sub, plansById) => {
+  const direct =
+    sub?.planNameSnapshot ||
+    sub?.PlanNameSnapshot ||
+    sub?.planName ||
+    sub?.PlanName ||
+    sub?.trainingPlanName ||
+    sub?.TrainingPlanName ||
+    sub?.plan?.name ||
+    sub?.trainingPlan?.name;
+  if (direct) return direct;
+
+  const planId = extractPlanId(sub);
+  if (planId == null) return null;
+  return plansById?.get?.(String(planId))?.name || null;
+};
+
+const extractPlanPrice = (sub, plansById) => {
+  const direct =
+    sub?.priceSnapshot ??
+    sub?.PriceSnapshot ??
+    sub?.planPrice ??
+    sub?.PlanPrice ??
+    sub?.plan_price ??
+    sub?.price ??
+    sub?.Price ??
+    sub?.plan?.price ??
+    sub?.trainingPlan?.price;
+  if (direct != null) return toNumber(direct);
+
+  const planId = extractPlanId(sub);
+  if (planId == null) return 0;
+  return toNumber(plansById?.get?.(String(planId))?.price);
+};
+
 const TrainerHomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -20,16 +79,55 @@ const TrainerHomePage = () => {
 
   const loadData = async () => {
     try {
-      const [trainerData, statsData, subsData] = await Promise.all([
+      const [trainerData, subsData, plansData] = await Promise.all([
         trainerService.getTrainerDetails(user.id),
-        trainerService.getTrainerStats(user.id),
         trainerService.getTrainerSubscriptions(user.id),
+        trainerService.getPlans(user.id),
       ]);
       setTrainer(trainerData);
-      setStats(statsData || { totalClients: 0, todayAmount: 0, totalAmount: 0 });
-      setSubscribers(subsData || []);
+      const subs = subsData || [];
+      const plans = plansData || [];
+      const plansById = new Map(
+        plans
+          .filter(p => p && (p.id != null || p.trainingPlanId != null || p.ID != null || p.Id != null))
+          .map(p => [String(p.id ?? p.trainingPlanId ?? p.ID ?? p.Id), p])
+      );
+
+      const enrichedSubs = subs.map((s) => ({
+        ...s,
+        __resolvedPlanName: extractPlanName(s, plansById),
+        __resolvedPlanPrice: extractPlanPrice(s, plansById),
+      }));
+      setSubscribers(enrichedSubs);
+
+      // Compute trainer stats on the frontend using subscription data
+      const totalClients = subs.length;
+      const totalAmount = enrichedSubs.reduce(
+        (sum, s) => sum + toNumber(s.__resolvedPlanPrice),
+        0
+      );
+
+      // Optional: amount earned from subscriptions that start today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayAmount = enrichedSubs.reduce((sum, s) => {
+        const startRaw = s.startDate || s.StartDate;
+        if (!startRaw) return sum;
+        const d = new Date(startRaw);
+        d.setHours(0, 0, 0, 0);
+        const isToday = d.getTime() === today.getTime();
+        return isToday ? sum + toNumber(s.__resolvedPlanPrice) : sum;
+      }, 0);
+
+      setStats({
+        totalClients,
+        todayAmount,
+        totalAmount,
+      });
+
     } catch (err) {
       console.error('Error loading trainer data:', err);
+      setStats({ totalClients: 0, todayAmount: 0, totalAmount: 0 }); // Ensure stats are reset on error
     } finally {
       setLoading(false);
     }
@@ -88,9 +186,10 @@ const TrainerHomePage = () => {
             </thead>
             <tbody>
               {subscribers.slice(0, 10).map((sub) => {
-                const endDate = sub.endDate ? new Date(sub.endDate) : null;
+                const endDate = (sub.endDate || sub.EndDate) ? new Date(sub.endDate || sub.EndDate) : null;
                 const isActive = endDate ? endDate > new Date() : false;
-                const finalImageUrl = sub.traineeProfileImageUrl || sub.profileImageUrl || sub.imageUrl || sub.traineeImage || sub.trainee?.profileImageUrl || sub.trainee?.imageUrl;
+                const finalImageUrl = sub.traineeProfileImageUrl || sub.TraineeProfileImageUrl || sub.profileImageUrl || sub.ProfileImageUrl || sub.imageUrl || sub.imageUrl || sub.traineeImage || sub.trainee?.profileImageUrl || sub.trainee?.imageUrl;
+                const planName = sub.__resolvedPlanName || null;
                 return (
                   <tr key={sub.id || sub.traineeId}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -101,9 +200,9 @@ const TrainerHomePage = () => {
                           <span className="material-icons" style={{ fontSize: 18, color: '#ccc' }}>person</span>
                         )}
                       </div>
-                      {sub.traineeName || 'Unknown'}
+                      {sub.traineeName || sub.TraineeName || 'Unknown'}
                     </td>
-                    <td>{sub.planName || sub.trainingPlanName || 'N/A'}</td>
+                    <td>{planName || 'N/A'}</td>
                     <td>
                       <span className={`${styles.badge} ${isActive ? styles.badgeGreen : styles.badgeRed}`}>
                         {isActive ? 'Active' : 'Expired'}

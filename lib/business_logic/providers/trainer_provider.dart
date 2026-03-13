@@ -62,17 +62,42 @@ class TrainerProvider extends ChangeNotifier {
       );
       if (response.isNotEmpty) {
         double totalAmount = 0.0;
+        final today = DateTime.now();
+        final todayStart = DateTime(today.year, today.month, today.day);
+        double todayAmount = 0.0;
+
         for (final sub in response) {
-          final rawPrice = sub['planPrice'] ?? sub['price'];
+          final rawPrice =
+              sub['priceSnapshot'] ??
+              sub['PriceSnapshot'] ??
+              sub['planPrice'] ??
+              sub['PlanPrice'] ??
+              sub['price'] ??
+              sub['Price'];
+
+          double parsedPrice = 0.0;
           if (rawPrice is num) {
-            totalAmount += rawPrice.toDouble();
+            parsedPrice = rawPrice.toDouble();
           } else if (rawPrice is String) {
-            totalAmount += double.tryParse(rawPrice) ?? 0.0;
+            parsedPrice = double.tryParse(rawPrice) ?? 0.0;
+          }
+          totalAmount += parsedPrice;
+
+          final startRaw = sub['startDate'] ?? sub['StartDate'];
+          if (startRaw is String) {
+            final start = DateTime.tryParse(startRaw);
+            if (start != null) {
+              final startDay = DateTime(start.year, start.month, start.day);
+              if (startDay == todayStart) {
+                todayAmount += parsedPrice;
+              }
+            }
           }
         }
+
         _stats = TrainerStats(
           totalClients: response.length,
-          todayAmount: 0.0,
+          todayAmount: todayAmount,
           totalAmount: totalAmount,
         );
       }
