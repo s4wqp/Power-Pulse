@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/presentation/widgets/cached_image.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TrainerAccountScreen extends StatefulWidget {
   const TrainerAccountScreen({super.key});
@@ -354,10 +355,12 @@ class _TrainerAccountScreenState extends State<TrainerAccountScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

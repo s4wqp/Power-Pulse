@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(375, 812), // Standard mobile design size
       minTextAdapt: true,
       splitScreenMode: true,
+      useInheritedMediaQuery: true,
       builder: (context, child) {
         return MultiProvider(
           providers: [

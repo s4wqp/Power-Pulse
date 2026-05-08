@@ -18,6 +18,10 @@ class ChatProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  /// Total unread messages across all chat contacts.
+  int get totalUnreadCount =>
+      _contacts.fold(0, (sum, c) => sum + c.unreadCount);
+
   HubConnection? _hubConnection;
   int? _currentUserId;
   String? _currentUserRole;
@@ -86,30 +90,38 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  /// Safely parse a dynamic value (String or num) to int.
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
   void _onReceiveMessage(List<Object?>? arguments) {
     if (arguments != null && arguments.isNotEmpty) {
       final message = arguments[0];
       if (message is Map) {
         final mapMsg = Map<String, dynamic>.from(message);
+
+        // Normalize IDs to int — SignalR may send them as String or num
+        final int? senderId = _toInt(mapMsg['senderId']);
+        final int? receiverId = _toInt(mapMsg['receiverId']);
+
         debugPrint(
-          "SignalR ReceiveMessage: senderId=${mapMsg['senderId']}, "
-          "receiverId=${mapMsg['receiverId']}, activeChatPartner=$_activeChatPartnerId",
+          "SignalR ReceiveMessage: senderId=$senderId, "
+          "receiverId=$receiverId, activeChatPartner=$_activeChatPartnerId, "
+          "currentUserId=$_currentUserId",
         );
 
         // Only add to messages list if we're in an active chat with this person
         if (_activeChatPartnerId != null) {
-          final senderId = mapMsg['senderId'];
-          final receiverId = mapMsg['receiverId'];
-
-          // Message belongs to this conversation if:
-          // - sent by our chat partner to us, OR
-          // - sent by us to our chat partner (echo from server)
           final belongsToChat =
               senderId == _activeChatPartnerId ||
               receiverId == _activeChatPartnerId;
 
           if (belongsToChat) {
-            // Verify not already in list
             final exists = _messages.any(
               (m) => m['id'] == mapMsg['id'] && mapMsg['id'] != null,
             );
@@ -120,7 +132,34 @@ class ChatProvider extends ChangeNotifier {
           }
         }
 
-        // Also refresh chat contact list for unread counts
+        // Locally increment unread count for the sender if we're NOT
+        // currently chatting with them. This gives instant badge updates.
+        if (senderId != null &&
+            senderId != _currentUserId &&
+            senderId != _activeChatPartnerId) {
+          final idx = _contacts.indexWhere((c) => c.userId == senderId);
+          if (idx != -1) {
+            final c = _contacts[idx];
+            _contacts[idx] = ChatContact(
+              userId: c.userId,
+              name: c.name,
+              role: c.role,
+              profileImageUrl: c.profileImageUrl,
+              lastMessage: mapMsg['content'] as String? ?? c.lastMessage,
+              lastMessageTime: mapMsg['sentAt'] as String? ?? c.lastMessageTime,
+              unreadCount: c.unreadCount + 1,
+            );
+            notifyListeners();
+          } else {
+            debugPrint(
+              "SignalR: senderId=$senderId not found in contacts list "
+              "(${_contacts.map((c) => c.userId).toList()}). "
+              "Refreshing contacts to pick up new subscriber.",
+            );
+          }
+        }
+
+        // Also refresh chat contact list from backend for accuracy
         if (_currentUserId != null && _currentUserRole != null) {
           fetchContacts(_currentUserId!, _currentUserRole!, showLoading: false);
         }
@@ -227,23 +266,24 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> markChatAsRead(int targetId) async {
+    // Optimistically clear the local count immediately for instant UI feedback
+    final index = _contacts.indexWhere((c) => c.userId == targetId);
+    if (index != -1) {
+      final currentContact = _contacts[index];
+      _contacts[index] = ChatContact(
+        userId: currentContact.userId,
+        name: currentContact.name,
+        role: currentContact.role,
+        profileImageUrl: currentContact.profileImageUrl,
+        lastMessage: currentContact.lastMessage,
+        lastMessageTime: currentContact.lastMessageTime,
+        unreadCount: 0,
+      );
+      notifyListeners();
+    }
+
     try {
       await _chatRepository.markChatAsRead(targetId);
-      // Remove unread count locally
-      final index = _contacts.indexWhere((c) => c.userId == targetId);
-      if (index != -1) {
-        final currentContact = _contacts[index];
-        _contacts[index] = ChatContact(
-          userId: currentContact.userId,
-          name: currentContact.name,
-          role: currentContact.role,
-          profileImageUrl: currentContact.profileImageUrl,
-          lastMessage: currentContact.lastMessage,
-          lastMessageTime: currentContact.lastMessageTime,
-          unreadCount: 0,
-        );
-        notifyListeners();
-      }
     } catch (e) {
       debugPrint("Failed to mark chat as read: $e");
     }

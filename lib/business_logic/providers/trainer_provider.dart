@@ -27,6 +27,11 @@ class TrainerProvider extends ChangeNotifier {
   Trainer? get currentTrainer => _currentTrainer;
   TrainerStats? get stats => _stats;
 
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> fetchTrainerSubscriptions(int trainerId) async {
     try {
       _subscriptions = await _trainerRepository.getTrainerSubscriptions(
@@ -586,8 +591,19 @@ class TrainerProvider extends ChangeNotifier {
         certPayload.remove('_hasNewImage');
 
         if (certId != null && certId != 0) {
-          if (!hasNewImage) {
-            // Cert was not changed, skip it
+          // Check if any field actually changed compared to backend data
+          final existingCert = existingCerts.cast<Certificate?>().firstWhere(
+            (c) => c?.id == certId,
+            orElse: () => null,
+          );
+          final bool textChanged =
+              existingCert != null &&
+              (existingCert.name != certPayload['certName'] ||
+                  existingCert.organization != certPayload['issuer'] ||
+                  existingCert.year != (certPayload['year'] ?? 0));
+
+          if (!hasNewImage && !textChanged) {
+            // Nothing was changed, skip it
             debugPrint('Certificate $certId unchanged, skipping');
             continue;
           }

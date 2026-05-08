@@ -8,6 +8,7 @@ import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/business_logic/providers/chat_provider.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
 import 'package:power_pulse/presentation/widgets/cached_image.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TrainerHomeScreen extends StatefulWidget {
   const TrainerHomeScreen({super.key});
@@ -499,12 +500,14 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: _currentIndex == 1
-                ? Custom().colors().lightGreen
-                : Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: _currentIndex == 1
+                  ? Custom().colors().lightGreen
+                  : Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

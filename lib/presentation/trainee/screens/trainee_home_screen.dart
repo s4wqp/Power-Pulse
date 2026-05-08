@@ -8,7 +8,9 @@ import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
 import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainee_provider.dart';
+import 'package:power_pulse/business_logic/providers/chat_provider.dart';
 import 'package:power_pulse/presentation/widgets/cached_image.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TraineeHomeScreen extends StatefulWidget {
   const TraineeHomeScreen({super.key});
@@ -78,6 +80,12 @@ class _TraineeHomeScreenState extends State<TraineeHomeScreen> {
 
       if (authProvider.userId != null) {
         traineeProvider.fetchProfile(authProvider.userId!);
+
+        // Fetch chat contacts so the unread badge on the nav bar has data
+        Provider.of<ChatProvider>(
+          context,
+          listen: false,
+        ).fetchContacts(authProvider.userId!, 'Trainee');
       }
     });
   }
@@ -552,11 +560,13 @@ class _TraineeHomeScreenState extends State<TraineeHomeScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 18.w,
-            height: 18.h,
-            color: Custom().colors().bottomNavigationBar,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 18.w,
+              height: 18.h,
+              color: Custom().colors().bottomNavigationBar,
+            ),
           ),
           label: 'Chat',
         ),

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/business_logic/providers/chat_provider.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -356,10 +357,12 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

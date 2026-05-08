@@ -8,15 +8,22 @@ class DriveService {
   final _googleSignIn = GoogleSignIn(scopes: [drive.DriveApi.driveFileScope]);
   GoogleSignInAccount? _currentUser;
 
-  /// Signs in the user and returns true if successful.
+  /// Signs in the user silently first (no popup). Falls back to interactive
+  /// sign-in only if silent auth fails (e.g. first time or expired session).
   Future<GoogleSignInAccount?> signIn() async {
     try {
-      // In google_sign_in ^6.2.1, use signIn().
-      // Scopes should be passed in constructor or requesting scopes.
-      final account = await _googleSignIn.signIn();
-      _currentUser = account;
+      // Try silent sign-in first — uses cached credentials, no popup
+      var account = await _googleSignIn.signInSilently();
+      if (account != null) {
+        _currentUser = account;
+        debugPrint('Google Sign-In: Silent success: ${account.email}');
+        return account;
+      }
 
-      debugPrint('Google Sign-In: Successful: ${account?.email}');
+      // Fall back to interactive sign-in (shows the Google popup)
+      account = await _googleSignIn.signIn();
+      _currentUser = account;
+      debugPrint('Google Sign-In: Interactive success: ${account?.email}');
       return account;
     } catch (e) {
       debugPrint('Error signing in: $e');

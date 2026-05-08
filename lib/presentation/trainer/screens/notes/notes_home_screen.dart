@@ -18,11 +18,20 @@ class NotesHomeScreen extends StatefulWidget {
 class _NotesHomeScreenState extends State<NotesHomeScreen> {
   List<Note> notes = [];
   bool _isLoading = true;
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchNotes();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchNotes() async {
@@ -52,8 +61,6 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
   }
 
   void _navigateAndDisplaySelection(BuildContext context) async {
-    // Navigator.push returns a Future that completes after calling
-    // Navigator.pop on the Selection Screen.
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -61,8 +68,6 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
       ),
     );
 
-    // After the Selection Screen returns a result, hide any previous snackbars
-    // and show the new result.
     if (!mounted) return;
 
     if (result != null && result is Note) {
@@ -85,16 +90,23 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
 
     if (result != null && result is Note) {
       setState(() {
-        // Find index and update
         final index = notes.indexWhere((n) => n.id == result.id);
         if (index != -1) {
           notes[index] = result;
         } else {
-          // If id changed (unlikely) or new, add it
           notes.add(result);
         }
       });
     }
+  }
+
+  List<Note> get _filteredNotes {
+    if (_searchQuery.isEmpty) return notes;
+    final query = _searchQuery.toLowerCase();
+    return notes.where((note) {
+      return note.title.toLowerCase().contains(query) ||
+          note.content.toLowerCase().contains(query);
+    }).toList();
   }
 
   @override
@@ -104,33 +116,62 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 0,
-        titleSpacing: 20.w,
-        automaticallyImplyLeading: true, // Allow going back to chat
+        titleSpacing: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black, size: 20.sp),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Notes',
-          style: TextStyle(
-            color: Custom().colors().lightGreen,
-            fontSize: 28.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search notes...',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16.sp),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(color: Colors.black, fontSize: 16.sp),
+              )
+            : Text(
+                'Notes',
+                style: TextStyle(
+                  color: Custom().colors().lightGreen,
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 20.w),
-            child: Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(
-                color: Custom().colors().lightGreen,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(10.r), // Rounded rectangle
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                });
+              },
+              child: Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: Custom().colors().lightGreen,
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(
+                  _isSearching ? Icons.close : Icons.search,
+                  color: Colors.white,
+                  size: 24.sp,
+                ),
               ),
-              child: Icon(Icons.search, color: Colors.white, size: 24.sp),
             ),
           ),
         ],
@@ -144,7 +185,7 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
           : (notes.isEmpty ? _buildEmptyState() : _buildNotesList()),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateAndDisplaySelection(context),
-        backgroundColor: Custom().colors().lightGreen, // Green
+        backgroundColor: Custom().colors().lightGreen,
         child: Icon(Icons.add, color: Colors.white, size: 30.sp),
       ),
     );
@@ -155,13 +196,11 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Illustration
           Image.asset(
-            'assets/images/notes_illustration.png', // Assuming this name, will fallback or be replaced
+            'assets/images/notes_illustration.png',
             width: 250.w,
             height: 250.h,
             errorBuilder: (context, error, stackTrace) {
-              // Return a placeholder if image missing
               return Icon(
                 Icons.edit_note,
                 size: 150.sp,
@@ -184,13 +223,22 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
   }
 
   Widget _buildNotesList() {
-    // Based on screenshot 1, there is a list item visible "Book Review : The Design of..."
-    // It looks like a card with light background.
+    final displayedNotes = _filteredNotes;
+
+    if (displayedNotes.isEmpty) {
+      return Center(
+        child: Text(
+          'No matching notes found',
+          style: TextStyle(color: Colors.grey, fontSize: 16.sp),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: EdgeInsets.all(20.w),
-      itemCount: notes.length,
+      itemCount: displayedNotes.length,
       itemBuilder: (context, index) {
-        final note = notes[index];
+        final note = displayedNotes[index];
         return Container(
           margin: EdgeInsets.only(bottom: 15.h),
           padding: EdgeInsets.all(15.w),
@@ -228,7 +276,7 @@ class _NotesHomeScreenState extends State<NotesHomeScreen> {
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  "${note.date.day}/${note.date.month}/${note.date.year}", // formatted date
+                  "${note.date.day}/${note.date.month}/${note.date.year}",
                   style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                 ),
               ],

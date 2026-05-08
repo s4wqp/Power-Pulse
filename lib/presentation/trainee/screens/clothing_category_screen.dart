@@ -80,6 +80,7 @@ class _ClothingCategoryScreenState extends State<ClothingCategoryScreen> {
   bool _isLoadingCategories = true;
   List<Map<String, dynamic>> _fetchedCategories = [];
   String _selectedCategoryName = 'All';
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -183,6 +184,7 @@ class _ClothingCategoryScreenState extends State<ClothingCategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           _buildHeader(context),
@@ -229,6 +231,11 @@ class _ClothingCategoryScreenState extends State<ClothingCategoryScreen> {
               ),
               Expanded(
                 child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search for a product',
                     hintStyle: TextStyle(
@@ -400,12 +407,22 @@ class _ClothingCategoryScreenState extends State<ClothingCategoryScreen> {
       );
     }
 
-    final List<Map<String, dynamic>> displayedItems =
-        _selectedCategoryName == 'All'
+    List<Map<String, dynamic>> displayedItems = _selectedCategoryName == 'All'
         ? _fetchedItems
         : _fetchedItems
               .where((i) => i['collection'] == _selectedCategoryName)
               .toList();
+
+    if (_searchQuery.isNotEmpty) {
+      displayedItems = displayedItems.where((item) {
+        final name = (item['name'] as String? ?? '').toLowerCase();
+        final desc = (item['description'] as String? ?? '').toLowerCase();
+        final collection = (item['collection'] as String? ?? '').toLowerCase();
+        return name.contains(_searchQuery) ||
+            desc.contains(_searchQuery) ||
+            collection.contains(_searchQuery);
+      }).toList();
+    }
 
     if (displayedItems.isEmpty) {
       return Padding(

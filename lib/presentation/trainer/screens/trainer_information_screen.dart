@@ -7,6 +7,7 @@ import 'package:power_pulse/routing.dart';
 import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TrainerInformationScreen extends StatefulWidget {
   const TrainerInformationScreen({super.key});
@@ -260,13 +261,14 @@ class _TrainerInformationScreenState extends State<TrainerInformationScreen> {
                         const SnackBar(content: Text('Profile updated')),
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            trainerProvider.errorMessage ?? 'Update failed',
-                          ),
-                        ),
-                      );
+                      final errorMsg =
+                          trainerProvider.errorMessage ?? 'Update failed';
+                      // Clear the error so the profile UI remains visible
+                      // (the Consumer would otherwise show the error view)
+                      trainerProvider.clearError();
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(errorMsg)));
                     }
                   }
                 },
@@ -490,10 +492,12 @@ class _TrainerInformationScreenState extends State<TrainerInformationScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

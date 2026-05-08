@@ -9,6 +9,7 @@ import 'package:power_pulse/business_logic/providers/trainer_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TrainerExerciseLibraryScreen extends StatefulWidget {
   final bool isSelectionMode;
@@ -667,10 +668,12 @@ class _TrainerExerciseLibraryScreenState
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

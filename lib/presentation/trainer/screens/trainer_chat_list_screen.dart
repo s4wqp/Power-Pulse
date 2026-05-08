@@ -6,6 +6,7 @@ import 'package:power_pulse/routing.dart';
 import 'package:power_pulse/business_logic/providers/chat_provider.dart';
 import 'package:power_pulse/business_logic/providers/auth_provider.dart';
 import 'package:power_pulse/data/models/trainer_models.dart';
+import 'package:power_pulse/presentation/widgets/chat_badge_icon.dart';
 
 class TrainerChatListScreen extends StatefulWidget {
   const TrainerChatListScreen({super.key});
@@ -293,12 +294,14 @@ class _TrainerChatListScreenState extends State<TrainerChatListScreen> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/icons/chat.png',
-            width: 20.w,
-            color: _currentIndex == 1
-                ? app_theme.Custom().colors().lightGreen
-                : Colors.grey,
+          icon: ChatBadgeIcon(
+            child: Image.asset(
+              'assets/icons/chat.png',
+              width: 20.w,
+              color: _currentIndex == 1
+                  ? app_theme.Custom().colors().lightGreen
+                  : Colors.grey,
+            ),
           ),
           label: 'Chat',
         ),

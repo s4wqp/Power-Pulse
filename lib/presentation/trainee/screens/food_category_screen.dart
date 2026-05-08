@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:power_pulse/custom.dart';
 import 'package:power_pulse/routing.dart';
 
-class FoodCategoryScreen extends StatelessWidget {
+class FoodCategoryScreen extends StatefulWidget {
   const FoodCategoryScreen({super.key});
+
+  @override
+  State<FoodCategoryScreen> createState() => _FoodCategoryScreenState();
+}
+
+class _FoodCategoryScreenState extends State<FoodCategoryScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +66,11 @@ class FoodCategoryScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search for a product',
                     hintStyle: const TextStyle(
@@ -205,13 +217,35 @@ class FoodCategoryScreen extends StatelessWidget {
       },
     ];
 
+    final filteredFoods = foods.where((food) {
+      final nameMatches = (food['name'] as String).toLowerCase().contains(
+        _searchQuery,
+      );
+      final descMatches = (food['description'] as String)
+          .toLowerCase()
+          .contains(_searchQuery);
+      return nameMatches || descMatches;
+    }).toList();
+
+    if (filteredFoods.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(
+          child: Text(
+            'No matching products found',
+            style: TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+        ),
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: foods.length,
+      itemCount: filteredFoods.length,
       separatorBuilder: (_, __) => const SizedBox(height: 30),
       itemBuilder: (context, index) {
-        return _buildFoodCard(context, foods[index]);
+        return _buildFoodCard(context, filteredFoods[index]);
       },
     );
   }

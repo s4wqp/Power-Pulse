@@ -32,6 +32,7 @@ class _GenericCategoryScreenState extends State<GenericCategoryScreen> {
   bool _isLoadingCategories = true;
   List<Map<String, dynamic>> _fetchedCategories = [];
   String _selectedCategoryName = 'All';
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -165,6 +166,7 @@ class _GenericCategoryScreenState extends State<GenericCategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           _buildHeader(context),
@@ -209,6 +211,11 @@ class _GenericCategoryScreenState extends State<GenericCategoryScreen> {
               ),
               Expanded(
                 child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase();
+                    });
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search for a product',
                     hintStyle: TextStyle(
@@ -331,12 +338,19 @@ class _GenericCategoryScreenState extends State<GenericCategoryScreen> {
       );
     }
 
-    final List<Map<String, dynamic>> displayedItems =
-        _selectedCategoryName == 'All'
+    List<Map<String, dynamic>> displayedItems = _selectedCategoryName == 'All'
         ? _fetchedItems
         : _fetchedItems
               .where((i) => i['subCategory'] == _selectedCategoryName)
               .toList();
+
+    if (_searchQuery.isNotEmpty) {
+      displayedItems = displayedItems.where((item) {
+        final name = (item['name'] as String? ?? '').toLowerCase();
+        final desc = (item['description'] as String? ?? '').toLowerCase();
+        return name.contains(_searchQuery) || desc.contains(_searchQuery);
+      }).toList();
+    }
 
     if (displayedItems.isEmpty) {
       return Padding(
