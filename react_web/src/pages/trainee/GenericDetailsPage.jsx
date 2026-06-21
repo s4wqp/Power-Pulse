@@ -5,6 +5,7 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import { showToast } from '../../utils/custom';
 import styles from '../../components/WebLayout.module.css';
+import { displayRating } from '../../utils/fakeRating';
 
 const GenericDetailsPage = () => {
   const navigate = useNavigate();
@@ -92,8 +93,15 @@ const GenericDetailsPage = () => {
               )}
             </div>
 
-            <div style={{ color: 'var(--color-primary)', fontSize: 28, fontWeight: 'bold', marginBottom: 24 }}>
+            <div style={{ color: 'var(--color-primary)', fontSize: 28, fontWeight: 'bold', marginBottom: 8 }}>
               {numericPrice.toFixed(2)} EGP
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24 }}>
+              {[1,2,3,4,5].map(s => (
+                <span key={s} className="material-icons" style={{ fontSize: 18, color: s <= Math.round(parseFloat(displayRating(null, item.id))) ? '#EEE720' : '#e0e0e0' }}>star</span>
+              ))}
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#555', marginLeft: 4 }}>{displayRating(null, item.id)}</span>
             </div>
 
             <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Description</h2>

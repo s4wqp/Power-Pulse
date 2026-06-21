@@ -4,6 +4,7 @@ import { trainerService } from '../../services/trainerService';
 import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
+import { displayRating } from '../../utils/fakeRating';
 
 const TrainerInformationPage = () => {
   const { user } = useAuthStore();
@@ -59,7 +60,7 @@ const TrainerInformationPage = () => {
           </div>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#888' }}>Rating</label>
-            <p style={{ fontSize: 16, fontWeight: 500, margin: '4px 0 16px' }}>⭐ {trainer?.rating?.toFixed(1) || '0.0'}</p>
+            <p style={{ fontSize: 16, fontWeight: 500, margin: '4px 0 16px' }}>⭐ {displayRating(trainer?.rating, trainer?.id)}</p>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#888' }}>Bio</label>

@@ -2,7 +2,7 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import styles from './WebLayout.module.css';
 
-const WebLayout = ({ children, title, subtitle }) => {
+const WebLayout = ({ children, title, subtitle, titleStyle }) => {
     return (
         <div className={styles.layout}>
             <Sidebar />
@@ -10,7 +10,7 @@ const WebLayout = ({ children, title, subtitle }) => {
                 <div className={styles.contentInner}>
                     {title && (
                         <div className={styles.pageHeader}>
-                            <h1 className={styles.pageTitle}>{title}</h1>
+                            <h1 className={styles.pageTitle} style={titleStyle}>{title}</h1>
                             {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
                         </div>
                     )}

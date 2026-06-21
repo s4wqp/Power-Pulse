@@ -4,6 +4,7 @@ import { productService } from '../../services/productService';
 import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
+import { displayRating } from '../../utils/fakeRating';
 
 const GenericCategoryPage = () => {
   const navigate = useNavigate();
@@ -67,7 +68,13 @@ const GenericCategoryPage = () => {
               </div>
               <div className={styles.itemBody}>
                 <div className={styles.itemName}>{product.name}</div>
-                <div className={styles.itemPrice}>{product.price} EGP</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                  <div className={styles.itemPrice}>{product.price} EGP</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span className="material-icons" style={{ fontSize: 14, color: '#EEE720' }}>star</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#666' }}>{displayRating(null, product.id)}</span>
+                  </div>
+                </div>
                 {product.calories && <div className={styles.itemMeta}>{product.calories} kcal</div>}
               </div>
             </div>

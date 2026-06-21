@@ -7,6 +7,7 @@ import WebLayout from '../../components/WebLayout';
 import CachedImage from '../../components/CachedImage';
 import styles from '../../components/WebLayout.module.css';
 import toast from 'react-hot-toast';
+import { displayRating } from '../../utils/fakeRating';
 
 const CoachProfilePage = () => {
   const { id } = useParams();
@@ -16,6 +17,22 @@ const CoachProfilePage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
+  const [zoomImage, setZoomImage] = useState(null);
+
+  const getFullResUrl = (url) => {
+    if (!url) return url;
+    if (url.includes('drive.google.com')) {
+      let id = null;
+      if (url.includes('id=')) {
+        const params = new URLSearchParams(url.split('?')[1]);
+        id = params.get('id');
+      } else if (url.includes('/d/')) {
+        id = url.split('/d/')[1].split('/')[0];
+      }
+      if (id) return `https://lh3.googleusercontent.com/d/${id}=s0`;
+    }
+    return url;
+  };
 
   useEffect(() => {
     loadTrainerData();
@@ -85,7 +102,7 @@ const CoachProfilePage = () => {
   }
 
   return (
-    <WebLayout title={trainer.name || 'Coach Profile'} subtitle={trainer.professionalTitle || 'Personal Trainer'}>
+    <WebLayout title={trainer.name || 'Coach Profile'} subtitle={trainer.professionalTitle || 'Personal Trainer'} titleStyle={{ background: 'linear-gradient(135deg, #17A073 0%, #14c486 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: 24, alignItems: 'start' }}>
         {/* Left: Profile card */}
         <div className={styles.card} style={{ textAlign: 'center', position: 'sticky', top: 24 }}>
@@ -105,7 +122,7 @@ const CoachProfilePage = () => {
               <div style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Years Exp</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#333' }}>{trainer.rating?.toFixed(1) || '0.0'}</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#333' }}>{displayRating(trainer.rating, trainer.id)}</div>
               <div style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rating</div>
             </div>
           </div>
@@ -117,6 +134,31 @@ const CoachProfilePage = () => {
               {trainer.specializations.map((s, i) => (
                 <span key={i} className={styles.badgeGreen} style={{ fontSize: 11, padding: '4px 10px', borderRadius: '8px' }}>{s.name || s}</span>
               ))}
+            </div>
+          )}
+
+          {/* Certifications */}
+          {trainer.certificates?.length > 0 && (
+            <div style={{ marginTop: 20, textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span className="material-icons" style={{ fontSize: 20, color: '#17A073' }}>verified</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#333' }}>Certifications</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {trainer.certificates.map((cert) => (
+                  <div key={cert.id} style={{ background: '#f8faf9', border: '1px solid rgba(23,160,115,0.15)', borderRadius: 12, padding: 14 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#333', marginBottom: 2 }}>{cert.name || cert.title}</div>
+                    {(cert.issuer || cert.institution) && (
+                      <div style={{ fontSize: 12, color: '#888' }}>{cert.issuer || cert.institution}</div>
+                    )}
+                    {cert.imageUrl && (
+                      <div onClick={() => setZoomImage(cert.imageUrl)} style={{ cursor: 'zoom-in', marginTop: 8 }}>
+                        <CachedImage imageUrl={cert.imageUrl} width="100%" height="80px" fit="contain" style={{ borderRadius: 8 }} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -180,6 +222,21 @@ const CoachProfilePage = () => {
           )}
         </div>
       </div>
+      {/* Lightbox overlay */}
+      {zoomImage && (
+        <div onClick={() => setZoomImage(null)} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out', animation: 'fadeIn 0.2s ease' }}>
+          <button onClick={() => setZoomImage(null)} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, backdropFilter: 'blur(4px)', zIndex: 10000 }}>
+            <span className="material-icons">close</span>
+          </button>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '90vh', cursor: 'default', animation: 'zoomIn 0.25s ease', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+            <img src={getFullResUrl(zoomImage)} alt="Certificate" referrerPolicy="no-referrer" style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain' }} />
+          </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+      `}</style>
     </WebLayout>
   );
 };

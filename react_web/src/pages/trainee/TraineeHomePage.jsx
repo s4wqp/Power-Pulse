@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { displayRating } from '../../utils/fakeRating';
 import useAuthStore from '../../stores/authStore';
 import useTraineeStore from '../../stores/traineeStore';
 import { trainerService } from '../../services/trainerService';
@@ -158,7 +160,7 @@ const TraineeHomePage = () => {
                   <div className={styles.itemMeta}>{trainer.professionalTitle || 'Personal Trainer'}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8 }}>
                     <span className="material-icons" style={{ fontSize: 16, color: '#EEE720' }}>star</span>
-                    <span style={{ fontSize: 13, fontWeight: 600 }}>{trainer.rating?.toFixed(1) || '0.0'}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{displayRating(trainer.rating, trainer.id)}</span>
                     <span style={{ fontSize: 12, color: '#aaa', marginLeft: 8 }}>{trainer.experienceYears || 0} yrs exp</span>
                   </div>
                   {trainer.specializations?.length > 0 && (
